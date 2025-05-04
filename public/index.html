@@ -1,0 +1,593 @@
+<html lang="id">
+ <head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+  <title>
+   V-PEDIA - Topup &amp; H2H Integration - Halaman Utama
+  </title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.0/css/all.min.css">
+  <style>
+   /* Reset & base */
+  *, *::before, *::after {
+    box-sizing: border-box;
+  }
+  body, h1, h2, h3, p, ul, li, a, button {
+    margin: 0;
+    padding: 0;
+    font-family: 'Inter', sans-serif;
+  }
+  body {
+    background-color: #f3f6fd;
+    color: #1e293b;
+    line-height: 1.6;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    font-size: 16px;
+    position: relative;
+    overflow-x: hidden;
+  }
+  a {
+    color: #2563eb;
+    text-decoration: none;
+    transition: color 0.3s ease;
+  }
+  a:hover, a:focus {
+    color: #1d4ed8;
+    outline: none;
+  }
+  /* Scrollbar for desktop */
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #e2e8f0;
+  }
+  ::-webkit-scrollbar-thumb {
+    background-color: #2563eb;
+    border-radius: 10px;
+  }
+
+  /* Background dots */
+  #background-dots {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* Header */
+  header {
+    background: linear-gradient(90deg, #2563eb 0%, #3b82f6 100%);
+    color: white;
+    padding: 1rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+    position: sticky;
+    top: 0;
+    z-index: 1001;
+  }
+  header h1 {
+    font-weight: 700;
+    font-size: 1.75rem;
+    letter-spacing: 0.1em;
+    user-select: none;
+    opacity: 0;
+    transform: translateY(-20px);
+    animation: fadeInDown 0.8s forwards 0.3s;
+  }
+  nav {
+    display: flex;
+    gap: 1rem;
+  }
+  nav a {
+    font-weight: 600;
+    font-size: 1rem;
+    padding: 0.5rem 1.25rem;
+    border-radius: 30px;
+    border: 2px solid transparent;
+    background-color: transparent;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+    cursor: pointer;
+    opacity: 0;
+    transform: translateY(-20px);
+    animation: fadeInDown 0.8s forwards;
+  }
+  nav a.login {
+    border-color: white;
+    color: white;
+  }
+  nav a.login:hover, nav a.login:focus {
+    background-color: white;
+    color: #2563eb;
+    outline-offset: 2px;
+  }
+  nav a.signup {
+    background-color: white;
+    color: #2563eb;
+    border-color: white;
+    box-shadow: 0 4px 12px rgb(37 99 235 / 0.3);
+  }
+  nav a.signup:hover, nav a.signup:focus {
+    background-color: #1d4ed8;
+    color: white;
+    border-color: #1d4ed8;
+    box-shadow: 0 6px 20px rgb(29 78 216 / 0.5);
+    outline-offset: 2px;
+  }
+  nav a.login {
+    animation-delay: 0.4s;
+  }
+  nav a.signup {
+    animation-delay: 0.5s;
+  }
+
+  /* Main */
+  main {
+    flex-grow: 1;
+    max-width: 1200px;
+    margin: 3rem auto 4rem;
+    padding: 0 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 4rem;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Hero Section */
+  .hero {
+    display: flex;
+    flex-direction: column-reverse;
+    align-items: center;
+    text-align: center;
+    gap: 2rem;
+  }
+  .hero-text {
+    max-width: 700px;
+    opacity: 0;
+    transform: translateX(-40px);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+  }
+  .hero-text.visible {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  .hero h2 {
+    font-size: 2.75rem;
+    font-weight: 700;
+    color: #1e40af;
+    line-height: 1.1;
+    margin-bottom: 1rem;
+    text-shadow: 0 1px 3px rgba(37, 99, 235, 0.3);
+  }
+  .hero p {
+    font-size: 1.125rem;
+    color: #475569;
+    line-height: 1.5;
+  }
+  .hero img {
+    width: 100%;
+    max-width: 600px;
+    border-radius: 20px;
+    box-shadow: 0 12px 30px rgba(37, 99, 235, 0.25);
+    transition: transform 0.4s ease;
+    opacity: 0;
+    transform: translateX(40px);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+  }
+  .hero img.visible {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  .hero img:hover, .hero img:focus {
+    transform: scale(1.03);
+    outline: none;
+  }
+
+  /* Features Section */
+  .features {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 2.5rem;
+  }
+  .feature-card {
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 6px 20px rgb(37 99 235 / 0.1);
+    padding: 2.5rem 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    transition: box-shadow 0.3s ease, transform 0.3s ease;
+    cursor: default;
+    opacity: 0;
+    transform: translateY(40px);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+  }
+  .feature-card.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .feature-card:focus-within, .feature-card:hover {
+    box-shadow: 0 12px 40px rgb(37 99 235 / 0.3);
+    transform: translateY(-6px);
+    outline: none;
+  }
+  .feature-icon {
+    font-size: 3.75rem;
+    color: #2563eb;
+    margin-bottom: 1.25rem;
+    filter: drop-shadow(0 2px 2px rgba(37, 99, 235, 0.3));
+  }
+  .feature-title {
+    font-size: 1.375rem;
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+    color: #1e40af;
+  }
+  .feature-desc {
+    font-size: 1rem;
+    color: #64748b;
+    line-height: 1.5;
+  }
+
+  /* Footer */
+  footer {
+    background: linear-gradient(90deg, #000000 0%, #0c0c0c 100%);
+    color: white;
+    padding: 3rem 2rem 2rem;
+    font-size: 0.9rem;
+    position: relative;
+    z-index: 1;
+  }
+  .footer-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2rem;
+    justify-content: space-between;
+  }
+  .footer-section {
+    flex: 1 1 220px;
+    min-width: 220px;
+  }
+  .footer-section h4 {
+    font-weight: 700;
+    font-size: 1.125rem;
+    margin-bottom: 1rem;
+    color: #bfdbfe;
+  }
+  .footer-section ul {
+    list-style: none;
+  }
+  .footer-section ul li {
+    margin-bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .footer-section ul li a {
+    color: #dbeafe;
+    transition: color 0.3s ease;
+  }
+  .footer-section ul li a:hover, .footer-section ul li a:focus {
+    color: #93c5fd;
+    outline: none;
+  }
+  .footer-section ul li i {
+    min-width: 18px;
+    text-align: center;
+  }
+  .footer-social {
+    display: flex;
+    gap: 1rem;
+    margin-top: 0.5rem;
+  }
+  .footer-social a {
+    color: #dbeafe;
+    font-size: 1.5rem;
+    transition: color 0.3s ease;
+  }
+  .footer-social a:hover, .footer-social a:focus {
+    color: #93c5fd;
+    outline: none;
+  }
+  .footer-bottom {
+    text-align: center;
+    margin-top: 2rem;
+    font-size: 0.85rem;
+    color: #cbd5e1;
+    user-select: none;
+  }
+
+  /* Animations */
+  @keyframes fadeInDown {
+    0% {
+      opacity: 0;
+      transform: translateY(-20px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Responsive */
+  @media (min-width: 768px) {
+    main {
+      padding: 0 2rem;
+    }
+    .hero {
+      flex-direction: row;
+      text-align: left;
+      gap: 3rem;
+      align-items: center;
+    }
+    .hero-text {
+      flex: 1;
+    }
+    .hero img {
+      flex: 1;
+      max-width: 600px;
+    }
+  }
+  @media (max-width: 480px) {
+    header h1 {
+      font-size: 1.4rem;
+    }
+    nav a {
+      font-size: 0.9rem;
+      padding: 0.4rem 1rem;
+    }
+    .hero h2 {
+      font-size: 2rem;
+    }
+    .feature-title {
+      font-size: 1.125rem;
+    }
+  }
+  </style>
+ </head>
+ <body>
+  <canvas id="background-dots" aria-hidden="true"></canvas>
+  <header>
+   <h1>V-PEDIA</h1>
+   <nav>
+    <a aria-label="Login ke akun" class="login" href="/auth/login">
+     <i aria-hidden="true" class="fas fa-sign-in-alt">
+     </i>Login</a>
+    <a aria-label="Daftar akun baru" class="signup" href="/auth/register">
+     <i aria-hidden="true" class="fas fa-user-plus">
+     </i>Daftar</a>
+   </nav>
+  </header>
+  <main>
+   <section aria-label="Tentang layanan topup dan integrasi H2H" class="hero">
+    <div class="hero-text">
+     <h2>Solusi Topup dan Integrasi H2H Terpercaya</h2>
+     <p>Kami menyediakan layanan topup pulsa, paket data, dan pembayaran digital dengan integrasi H2H (host-to-host) yang cepat, aman, dan mudah digunakan. Platform kami dirancang untuk memudahkan bisnis Anda dalam mengelola transaksi secara otomatis dan real-time.</p>
+    </div>
+    <img alt="Ilustrasi digital yang menggambarkan proses topup pulsa dan integrasi host-to-host dengan perangkat komputer dan jaringan data, menampilkan komputer, jaringan, dan ikon digital" height="400" src="https://files.catbox.moe/o52sqb.jpg" tabindex="0" width="600"/>
+   </section>
+   <section aria-label="Fitur utama layanan" class="features">
+    <article class="feature-card" tabindex="0">
+     <i aria-hidden="true" class="fas fa-bolt feature-icon">
+     </i>
+     <h3 class="feature-title">Topup Pulsa Instan</h3>
+     <p class="feature-desc">Isi ulang pulsa dan paket data dengan proses instan tanpa menunggu lama, mendukung berbagai operator di Indonesia.</p>
+    </article>
+    <article class="feature-card" tabindex="0">
+     <i aria-hidden="true" class="fas fa-network-wired feature-icon">
+     </i>
+     <h3 class="feature-title">Integrasi H2H Otomatis</h3>
+     <p class="feature-desc">Hubungkan sistem Anda langsung dengan server kami menggunakan protokol host-to-host untuk transaksi otomatis dan real-time.</p>
+    </article>
+    <article class="feature-card" tabindex="0">
+     <i aria-hidden="true" class="fas fa-shield-alt feature-icon">
+     </i>
+     <h3 class="feature-title">Keamanan Terjamin</h3>
+     <p class="feature-desc">Sistem kami dilengkapi dengan enkripsi dan proteksi terbaik untuk menjaga keamanan data dan transaksi Anda.</p>
+    </article>
+    <article class="feature-card" tabindex="0">
+     <i aria-hidden="true" class="fas fa-mobile-alt feature-icon">
+     </i>
+     <h3 class="feature-title">Dashboard User Friendly</h3>
+     <p class="feature-desc">Kelola transaksi dan laporan dengan mudah melalui dashboard yang intuitif dan responsif di berbagai perangkat.</p>
+    </article>
+    <article class="feature-card" tabindex="0">
+     <i aria-hidden="true" class="fas fa-headset feature-icon">
+     </i>
+     <h3 class="feature-title">Dukungan Pelanggan 24/7</h3>
+     <p class="feature-desc">Tim support kami siap membantu Anda kapan saja melalui chat, email, atau telepon.</p>
+    </article>
+    <article class="feature-card" tabindex="0">
+     <i aria-hidden="true" class="fas fa-cogs feature-icon">
+     </i>
+     <h3 class="feature-title">Customizable API</h3>
+     <p class="feature-desc">API kami dapat disesuaikan dengan kebutuhan bisnis Anda untuk integrasi yang lebih fleksibel dan efisien.</p>
+    </article>
+   </section>
+  </main>
+  <footer>
+   <div class="footer-container" role="contentinfo">
+    <section aria-labelledby="footer-about" class="footer-section">
+     <h4 id="footer-about">
+      Tentang Kami
+     </h4>
+     <p>
+      V-PEDIA adalah platform terpercaya yang menyediakan layanan topup pulsa dan integrasi H2H untuk memudahkan bisnis Anda dalam transaksi digital.
+     </p>
+    </section>
+    <section aria-labelledby="footer-links" class="footer-section">
+     <h4 id="footer-links">Tautan Cepat</h4>
+     <ul>
+      <li>
+       <a aria-label="Beranda" href="/auth/register"><i class="fa-solid fa-angle-right"></i> Beranda</a>
+      </li>
+      <li>
+       <a aria-label="Fitur" href="/auth/register"><i class="fa-solid fa-angle-right"></i> Fitur</a>
+      </li>
+      <li>
+       <a aria-label="Harga" href="/auth/register"><i class="fa-solid fa-angle-right"></i> Harga</a>
+      </li>
+      <li>
+       <a aria-label="Kontak" href="https://t.me/rerezz_official"><i class="fa-solid fa-angle-right"></i> Kontak</a>
+      </li>
+      <li>
+       <a aria-label="Bantuan" href="https://wa.me/6285216955233"><i class="fa-solid fa-angle-right"></i> Bantuan</a>
+      </li>
+     </ul>
+    </section>
+    <section aria-labelledby="footer-contact" class="footer-section">
+     <h4 id="footer-contact">Kontak Kami</h4>
+     <ul>
+      <li>
+       <i aria-hidden="true" class="fas fa-map-marker-alt">
+       </i>Kota Sukabumi, Jawa Barat, Indonesia</li>
+      <li>
+       <i aria-hidden="true" class="fas fa-phone-alt"></i>
+       <a aria-label="Telepon +62 21 1234 5678" href="tel:+6285216955233">+62 852 1695 5233</a>
+      </li>
+      <li>
+       <i aria-hidden="true" class="fas fa-envelope"></i>
+       <a aria-label="Email rerezzofficial@gmail.com" href="mailto:rerezzofficial@gmail.com">rerezzofficial@gmail.com</a>
+      </li>
+     </ul>
+     <div aria-label="Sosial media" class="footer-social">
+      <a aria-label="Facebook" href="#" rel="noopener" target="_blank">
+       <i class="fab fa-facebook-f"></i>
+      </a>
+      <a aria-label="Twitter" href="#" rel="noopener" target="_blank">
+       <i class="fab fa-twitter"></i>
+      </a>
+      <a aria-label="Instagram" href="#" rel="noopener" target="_blank">
+       <i class="fab fa-instagram"></i>
+      </a>
+      <a aria-label="LinkedIn" href="#" rel="noopener" target="_blank">
+       <i class="fab fa-linkedin-in"></i>
+      </a>
+     </div>
+    </section>
+   </div>
+   <div class="footer-bottom" role="contentinfo">
+    © 2024 V-PEDIA. Semua hak cipta dilindungi.
+   </div>
+  </footer>
+  <script>
+   // Background dots animation
+const canvas = document.getElementById('background-dots');
+const ctx = canvas.getContext('2d');
+let width, height;
+let dots = [];
+
+function random(min, max) {
+  return Math.random() * (max - min) + min;
+}
+
+class Dot {
+  constructor() {
+    this.x = random(0, width);
+    this.y = random(0, height);
+    this.radius = random(1, 3);
+    this.speedX = random(-0.3, 0.3);
+    this.speedY = random(-0.3, 0.3);
+    this.alpha = random(0.1, 0.5);
+    this.alphaChange = random(0.002, 0.005);
+    this.alphaDirection = 1;
+  }
+  update() {
+    this.x += this.speedX;
+    this.y += this.speedY;
+
+    if (this.x < 0 || this.x > width) this.speedX *= -1;
+    if (this.y < 0 || this.y > height) this.speedY *= -1;
+
+    this.alpha += this.alphaChange * this.alphaDirection;
+    if (this.alpha >= 0.5) this.alphaDirection = -1;
+    else if (this.alpha <= 0.1) this.alphaDirection = 1;
+  }
+  draw() {
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(37, 99, 235, ${this.alpha})`;
+    ctx.fill();
+  }
+}
+
+function initDots() {
+  dots = [];
+  const count = Math.floor((window.innerWidth * window.innerHeight) / 8000);
+  for (let i = 0; i < count; i++) {
+    dots.push(new Dot());
+  }
+}
+
+function resize() {
+  width = window.innerWidth;
+  height = window.innerHeight;
+  canvas.width = width;
+  canvas.height = height;
+  initDots();
+}
+
+function animate() {
+  ctx.clearRect(0, 0, width, height);
+  dots.forEach(dot => {
+    dot.update();
+    dot.draw();
+  });
+  requestAnimationFrame(animate);
+}
+
+resize();
+animate();
+window.addEventListener('resize', resize);
+
+// Scroll reveal animation
+function isInViewport(el) {
+  const rect = el.getBoundingClientRect();
+  return (
+    rect.top <= (window.innerHeight || document.documentElement.clientHeight) * 0.85 &&
+    rect.bottom >= 0
+  );
+}
+
+function scrollReveal() {
+  const heroText = document.querySelector('.hero-text');
+  const heroImg = document.querySelector('.hero img');
+  const features = document.querySelectorAll('.feature-card');
+
+  if (isInViewport(heroText)) {
+    heroText.classList.add('visible');
+  }
+  if (isInViewport(heroImg)) {
+    heroImg.classList.add('visible');
+  }
+  features.forEach((feature, i) => {
+    if (isInViewport(feature)) {
+      setTimeout(() => {
+        feature.classList.add('visible');
+      }, i * 150);
+    }
+  });
+}
+
+window.addEventListener('scroll', scrollReveal);
+window.addEventListener('load', scrollReveal);
+  </script>
+ </body>
+</html>
