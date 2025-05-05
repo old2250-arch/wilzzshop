@@ -7,6 +7,7 @@ const mongoose = require('mongoose');
 const puppeteer = require('puppeteer');
 const bcrypt = require('bcryptjs');
 const multer = require('multer');
+const qrcode = require('qrcode');
 const fs = require('fs');
 const FormData = require('form-data');
 const axios = require('axios');
@@ -1371,106 +1372,139 @@ app.get('/api/order/check', async (req, res) => {
   }
 });
 
+async function uploadToCloudMini(buffer, fileName) {
+  try {
+      const form = new FormData();
+      form.append('file', buffer, { filename: fileName, contentType: 'image/png' });
+      const response = await axios.post('https://files.cloudmini.net/upload', form, {
+          headers: { ...form.getHeaders() }
+      });
+      const { filename, expiry_time } = response.data;
+      return {
+          url: `https://files.cloudmini.net/download/${filename}`,
+          expired: expiry_time
+      };
+  } catch (err) {
+      console.error('🚫 Upload to CloudMini Failed:', err);
+      throw err;
+  }
+}
+
+async function generateQRAndUpload(data) {
+  try {
+      const qrBuffer = await qrcode.toBuffer(data, { type: 'png' });
+      const filename = `v-pedia-${Math.random().toString(36).substring(2, 8)}.png`;
+      const { url } = await uploadToCloudMini(qrBuffer, filename);
+      return url;
+  } catch (error) {
+      console.error('❌ Error saat membuat/upload QR:', error);
+      throw error;
+  }
+}
+
 app.get('/api/deposit/create', validateApiKey, async (req, res) => {
   try {
-    const { nominal } = req.query;
-    const user = req.user;
+      const { nominal } = req.query;
+      const user = req.user;
 
-    if (!nominal) {
-      return res.status(400).json({
-        success: false,
-        message: 'Parameter nominal wajib diisi'
-      });
-    }
-
-    const reff_id = generateReffId();
-    const url = `${BASE_URL}/deposit/create`;
-
-    const params = new URLSearchParams();
-    params.append("api_key", ATLAN_API_KEY);
-    params.append("reff_id", reff_id);
-    params.append("nominal", nominal);
-    params.append("type", "ewallet");
-    params.append("metode", "qrisfast");
-
-    // Menggunakan axios untuk membuat permintaan deposit
-    const depositResponse = await axios.post(url, params.toString(), {
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
-      }
-    });
-
-    const depositData = depositResponse.data?.data;
-    if (!depositData?.id) {
-      return res.status(400).json({
-        success: false,
-        message: 'Gagal membuat permintaan deposit'
-      });
-    }
-
-    res.json({
-      success: true,
-      message: 'Permintaan deposit dibuat',
-      data: depositData
-    });
-
-    const checkDeposit = async () => {
-      const statusUrl = `${BASE_URL}/deposit/status`;
-      const statusParams = new URLSearchParams();
-      statusParams.append("api_key", ATLAN_API_KEY);
-      statusParams.append("id", depositData.id);
-
-      // Menggunakan axios untuk memeriksa status deposit
-      const statusResponse = await axios.post(statusUrl, statusParams.toString(), {
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
-        }
-      });
-
-      const statusData = statusResponse.data?.data;
-      const status = statusData?.status;
-
-      if (status === "success") {
-        const saldoMasuk = parseInt(statusData.get_balance || 0);
-        user.saldo += saldoMasuk;
-        user.history.push({
-          aktivitas: 'Deposit',
-          nominal: saldoMasuk,
-          status: 'Sukses',
-          code: depositData.id,
-          tanggal: new Date()
-        });
-        await user.save();
-        console.log(`✅ Deposit sukses: ${saldoMasuk} untuk ${user.username}`);
-        return;
+      if (!nominal) {
+          return res.status(400).json({
+              success: false,
+              message: 'Parameter nominal wajib diisi'
+          });
       }
 
-      if (status === "failed") {
-        user.history.push({
-          aktivitas: 'Deposit',
-          nominal: parseInt(nominal),
-          status: 'Gagal',
-          code: depositData.id,
-          tanggal: new Date()
-        });
-        await user.save();
-        console.log(`❌ Deposit gagal untuk ${user.username}`);
-        return;
+      const reff_id = generateReffId();
+      const url = `${BASE_URL}/deposit/create`;
+
+      const params = new URLSearchParams();
+      params.append("api_key", ATLAN_API_KEY);
+      params.append("reff_id", reff_id);
+      params.append("nominal", nominal);
+      params.append("type", "ewallet");
+      params.append("metode", "qrisfast");
+
+      const depositResponse = await axios.post(url, params.toString(), {
+          headers: {
+              'Content-Type': 'application/x-www-form-urlencoded',
+              'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+          }
+      });
+
+      const depositData = depositResponse.data?.data;
+      if (!depositData?.id) {
+          return res.status(400).json({
+              success: false,
+              message: 'Gagal membuat permintaan deposit'
+          });
       }
 
-      setTimeout(checkDeposit, 5000);
-    };
+      const qrUrl = await generateQRAndUpload(depositData.qr_string);
 
-    checkDeposit();
+      res.json({
+          success: true,
+          message: 'Permintaan deposit dibuat',
+          data: {
+              ...depositData,
+              qr_image: qrUrl
+          }
+      });
+
+      const checkDeposit = async () => {
+          const statusUrl = `${BASE_URL}/deposit/status`;
+          const statusParams = new URLSearchParams();
+          statusParams.append("api_key", ATLAN_API_KEY);
+          statusParams.append("id", depositData.id);
+
+          const statusResponse = await axios.post(statusUrl, statusParams.toString(), {
+              headers: {
+                  'Content-Type': 'application/x-www-form-urlencoded',
+                  'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+              }
+          });
+
+          const statusData = statusResponse.data?.data;
+          const status = statusData?.status;
+
+          if (status === "success") {
+              const saldoMasuk = parseInt(statusData.get_balance || 0);
+              user.saldo += saldoMasuk;
+              user.history.push({
+                  aktivitas: 'Deposit',
+                  nominal: saldoMasuk,
+                  status: 'Sukses',
+                  code: depositData.id,
+                  tanggal: new Date()
+              });
+              await user.save();
+              console.log(`✅ Deposit sukses: ${saldoMasuk} untuk ${user.username}`);
+              return;
+          }
+
+          if (status === "failed") {
+              user.history.push({
+                  aktivitas: 'Deposit',
+                  nominal: parseInt(nominal),
+                  status: 'Gagal',
+                  code: depositData.id,
+                  tanggal: new Date()
+              });
+              await user.save();
+              console.log(`❌ Deposit gagal untuk ${user.username}`);
+              return;
+          }
+
+          setTimeout(checkDeposit, 5000);
+      };
+
+      checkDeposit();
 
   } catch (error) {
-    console.error('❌ Error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Terjadi kesalahan pada server'
-    });
+      console.error('❌ Error:', error);
+      res.status(500).json({
+          success: false,
+          message: 'Terjadi kesalahan pada server'
+      });
   }
 });
 
