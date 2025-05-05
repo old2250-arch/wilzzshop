@@ -1128,7 +1128,7 @@ app.get('/h2h/game/free-fire', validateApiKey, async (req, res) => {
   res.json({ success: true, data: result, message: 'Data produk Free Fire berhasil didapatkan' });
 });
 
-app.get('/api/order/create', validateApiKey, async (req, res) => {
+app.get('/h2h/order/create', validateApiKey, async (req, res) => {
   try {
     const { code, target } = req.query;
     const user = req.user;
@@ -1301,7 +1301,7 @@ function generateReffId() {
   return 'TRX-' + Math.random().toString(36).substring(2, 10).toUpperCase();
 }
 
-app.get('/api/order/check', async (req, res) => {
+app.get('/h2h/order/check', async (req, res) => {
   try {
     const { trxid, apikey } = req.query;
 
@@ -1402,7 +1402,7 @@ async function generateQRAndUpload(data) {
   }
 }
 
-app.get('/api/deposit/create', validateApiKey, async (req, res) => {
+app.get('/h2h/deposit/create', validateApiKey, async (req, res) => {
   try {
       const { nominal } = req.query;
       const user = req.user;
@@ -1508,7 +1508,7 @@ app.get('/api/deposit/create', validateApiKey, async (req, res) => {
   }
 });
 
-app.get('/api/deposit/status', validateApiKey, async (req, res) => {
+app.get('/h2h/deposit/status', validateApiKey, async (req, res) => {
   const { trxid } = req.query;
   const user = req.user;
 
@@ -1553,6 +1553,67 @@ app.get('/api/deposit/status', validateApiKey, async (req, res) => {
 
   } catch (error) {
     console.error('❌ Error saat cek status deposit:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Terjadi kesalahan pada server'
+    });
+  }
+});
+
+app.post('/h2h/deposit/cancel', validateApiKey, async (req, res) => {
+  const { trxid } = req.body;
+  const user = req.user;
+
+  if (!trxid) {
+    return res.status(400).json({
+      success: false,
+      message: 'Parameter trxid wajib diisi'
+    });
+  }
+
+  try {
+    const url = `${BASE_URL}/deposit/cancel`;
+    const params = new URLSearchParams();
+    params.append("api_key", ATLAN_API_KEY);
+    params.append("id", trxid);
+
+    // Menggunakan axios untuk mengirim permintaan cancel deposit
+    const cancelResponse = await axios.post(url, params.toString(), {
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+      }
+    });
+
+    const cancelData = cancelResponse.data?.data;
+    if (!cancelData) {
+      return res.status(404).json({
+        success: false,
+        message: 'Data tidak ditemukan dari server eksternal'
+      });
+    }
+
+    return res.json({
+      success: true,
+      message: 'Deposit berhasil dibatalkan',
+      data: {
+        trxid: cancelData.id,
+        status: cancelData.status,
+        created_at: cancelData.created_at
+      }
+    });
+
+  } catch (error) {
+    console.error('❌ Error saat membatalkan deposit:', error);
+    
+    // Handle error response dari API eksternal jika ada
+    if (error.response && error.response.data) {
+      return res.status(error.response.status || 500).json({
+        success: false,
+        message: error.response.data.message || 'Gagal membatalkan deposit'
+      });
+    }
+    
     res.status(500).json({
       success: false,
       message: 'Terjadi kesalahan pada server'
