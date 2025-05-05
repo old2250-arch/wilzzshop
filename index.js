@@ -968,51 +968,35 @@ app.get('/h2h/categori', validateApiKey, async (req, res) => {
 
 app.get('/api/providers', validateApiKey, async (req, res) => {
   try {
-    const browser = await puppeteer.launch({ headless: true });
-    const page = await browser.newPage();
-
-    await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
-
     const url = `${BASE_URL}/layanan/price_list`;
-    await page.goto(url, { waitUntil: 'networkidle2', timeout: 60000 });
-
-    await new Promise(resolve => setTimeout(resolve, 5000));
 
     const params = new URLSearchParams();
     params.append("api_key", ATLAN_API_KEY);
     params.append("type", "prabayar");
 
-    const response = await page.evaluate(async (url, params) => {
-      const formData = new URLSearchParams(params).toString();
-      const fetchResponse = await fetch(url, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-          'Accept-Language': 'en-US,en;q=0.9',
-          'Sec-Fetch-Dest': 'document',
-          'Sec-Fetch-Mode': 'navigate',
-          'Sec-Fetch-Site': 'none',
-          'Sec-Fetch-User': '?1',
-          'Referer': url
-        },
-        body: formData
-      });
-      return fetchResponse.json();
-    }, url, params.toString());
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Accept-Language': 'en-US,en;q=0.9',
+        'Referer': url,
+      },
+      body: params
+    });
 
-    await browser.close();
+    const data = await response.json();
 
-    if (!response.status) {
+    if (!data.status) {
       return res.status(500).json({
         success: false,
         message: 'Server maintenance',
         maintenance: true,
-        ip_message: response.message.replace(/[^0-9.]+/g, '')
+        ip_message: data.message.replace(/[^0-9.]+/g, '')
       });
     }
 
-    const providers = [...new Set(response.data.map(item => item.provider))];
+    const providers = [...new Set(data.data.map(item => item.provider))];
 
     res.json({
       success: true,
