@@ -1,593 +1,1186 @@
+<!DOCTYPE html>
 <html lang="id">
- <head>
+<head>
   <meta charset="utf-8"/>
   <meta content="width=device-width, initial-scale=1" name="viewport"/>
-  <title>
-   V-PEDIA - Topup &amp; H2H Integration - Halaman Utama
-  </title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet"/>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.0/css/all.min.css">
+  <title>V-PEDIA - Topup & H2H Integration - Halaman Utama</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
   <style>
-   /* Reset & base */
-  *, *::before, *::after {
-    box-sizing: border-box;
-  }
-  body, h1, h2, h3, p, ul, li, a, button {
-    margin: 0;
-    padding: 0;
-    font-family: 'Inter', sans-serif;
-  }
-  body {
-    background-color: #f3f6fd;
-    color: #1e293b;
-    line-height: 1.6;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    font-size: 16px;
-    position: relative;
-    overflow-x: hidden;
-  }
-  a {
-    color: #2563eb;
-    text-decoration: none;
-    transition: color 0.3s ease;
-  }
-  a:hover, a:focus {
-    color: #1d4ed8;
-    outline: none;
-  }
-  /* Scrollbar for desktop */
-  ::-webkit-scrollbar {
-    width: 8px;
-  }
-  ::-webkit-scrollbar-track {
-    background: #e2e8f0;
-  }
-  ::-webkit-scrollbar-thumb {
-    background-color: #2563eb;
-    border-radius: 10px;
-  }
-
-  /* Background dots */
-  #background-dots {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    pointer-events: none;
-    z-index: 0;
-  }
-
-  /* Header */
-  header {
-    background: linear-gradient(90deg, #2563eb 0%, #3b82f6 100%);
-    color: white;
-    padding: 1rem 2rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
-    position: sticky;
-    top: 0;
-    z-index: 1001;
-  }
-  header h1 {
-    font-weight: 700;
-    font-size: 1.75rem;
-    letter-spacing: 0.1em;
-    user-select: none;
-    opacity: 0;
-    transform: translateY(-20px);
-    animation: fadeInDown 0.8s forwards 0.3s;
-  }
-  nav {
-    display: flex;
-    gap: 1rem;
-  }
-  nav a {
-    font-weight: 600;
-    font-size: 1rem;
-    padding: 0.5rem 1.25rem;
-    border-radius: 30px;
-    border: 2px solid transparent;
-    background-color: transparent;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
-    cursor: pointer;
-    opacity: 0;
-    transform: translateY(-20px);
-    animation: fadeInDown 0.8s forwards;
-  }
-  nav a.login {
-    border-color: white;
-    color: white;
-  }
-  nav a.login:hover, nav a.login:focus {
-    background-color: white;
-    color: #2563eb;
-    outline-offset: 2px;
-  }
-  nav a.signup {
-    background-color: white;
-    color: #2563eb;
-    border-color: white;
-    box-shadow: 0 4px 12px rgb(37 99 235 / 0.3);
-  }
-  nav a.signup:hover, nav a.signup:focus {
-    background-color: #1d4ed8;
-    color: white;
-    border-color: #1d4ed8;
-    box-shadow: 0 6px 20px rgb(29 78 216 / 0.5);
-    outline-offset: 2px;
-  }
-  nav a.login {
-    animation-delay: 0.4s;
-  }
-  nav a.signup {
-    animation-delay: 0.5s;
-  }
-
-  /* Main */
-  main {
-    flex-grow: 1;
-    max-width: 1200px;
-    margin: 3rem auto 4rem;
-    padding: 0 1.5rem;
-    display: flex;
-    flex-direction: column;
-    gap: 4rem;
-    position: relative;
-    z-index: 1;
-  }
-
-  /* Hero Section */
-  .hero {
-    display: flex;
-    flex-direction: column-reverse;
-    align-items: center;
-    text-align: center;
-    gap: 2rem;
-  }
-  .hero-text {
-    max-width: 700px;
-    opacity: 0;
-    transform: translateX(-40px);
-    transition: opacity 0.8s ease, transform 0.8s ease;
-  }
-  .hero-text.visible {
-    opacity: 1;
-    transform: translateX(0);
-  }
-  .hero h2 {
-    font-size: 2.75rem;
-    font-weight: 700;
-    color: #1e40af;
-    line-height: 1.1;
-    margin-bottom: 1rem;
-    text-shadow: 0 1px 3px rgba(37, 99, 235, 0.3);
-  }
-  .hero p {
-    font-size: 1.125rem;
-    color: #475569;
-    line-height: 1.5;
-  }
-  .hero img {
-    width: 100%;
-    max-width: 600px;
-    border-radius: 20px;
-    box-shadow: 0 12px 30px rgba(37, 99, 235, 0.25);
-    transition: transform 0.4s ease;
-    opacity: 0;
-    transform: translateX(40px);
-    transition: opacity 0.8s ease, transform 0.8s ease;
-  }
-  .hero img.visible {
-    opacity: 1;
-    transform: translateX(0);
-  }
-  .hero img:hover, .hero img:focus {
-    transform: scale(1.03);
-    outline: none;
-  }
-
-  /* Features Section */
-  .features {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 2.5rem;
-  }
-  .feature-card {
-    background: white;
-    border-radius: 20px;
-    box-shadow: 0 6px 20px rgb(37 99 235 / 0.1);
-    padding: 2.5rem 2rem;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    transition: box-shadow 0.3s ease, transform 0.3s ease;
-    cursor: default;
-    opacity: 0;
-    transform: translateY(40px);
-    transition: opacity 0.8s ease, transform 0.8s ease;
-  }
-  .feature-card.visible {
-    opacity: 1;
-    transform: translateY(0);
-  }
-  .feature-card:focus-within, .feature-card:hover {
-    box-shadow: 0 12px 40px rgb(37 99 235 / 0.3);
-    transform: translateY(-6px);
-    outline: none;
-  }
-  .feature-icon {
-    font-size: 3.75rem;
-    color: #2563eb;
-    margin-bottom: 1.25rem;
-    filter: drop-shadow(0 2px 2px rgba(37, 99, 235, 0.3));
-  }
-  .feature-title {
-    font-size: 1.375rem;
-    font-weight: 700;
-    margin-bottom: 0.75rem;
-    color: #1e40af;
-  }
-  .feature-desc {
-    font-size: 1rem;
-    color: #64748b;
-    line-height: 1.5;
-  }
-
-  /* Footer */
-  footer {
-    background: linear-gradient(90deg, #000000 0%, #0c0c0c 100%);
-    color: white;
-    padding: 3rem 2rem 2rem;
-    font-size: 0.9rem;
-    position: relative;
-    z-index: 1;
-  }
-  .footer-container {
-    max-width: 1200px;
-    margin: 0 auto;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 2rem;
-    justify-content: space-between;
-  }
-  .footer-section {
-    flex: 1 1 220px;
-    min-width: 220px;
-  }
-  .footer-section h4 {
-    font-weight: 700;
-    font-size: 1.125rem;
-    margin-bottom: 1rem;
-    color: #bfdbfe;
-  }
-  .footer-section ul {
-    list-style: none;
-  }
-  .footer-section ul li {
-    margin-bottom: 0.75rem;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-  }
-  .footer-section ul li a {
-    color: #dbeafe;
-    transition: color 0.3s ease;
-  }
-  .footer-section ul li a:hover, .footer-section ul li a:focus {
-    color: #93c5fd;
-    outline: none;
-  }
-  .footer-section ul li i {
-    min-width: 18px;
-    text-align: center;
-  }
-  .footer-social {
-    display: flex;
-    gap: 1rem;
-    margin-top: 0.5rem;
-  }
-  .footer-social a {
-    color: #dbeafe;
-    font-size: 1.5rem;
-    transition: color 0.3s ease;
-  }
-  .footer-social a:hover, .footer-social a:focus {
-    color: #93c5fd;
-    outline: none;
-  }
-  .footer-bottom {
-    text-align: center;
-    margin-top: 2rem;
-    font-size: 0.85rem;
-    color: #cbd5e1;
-    user-select: none;
-  }
-
-  /* Animations */
-  @keyframes fadeInDown {
-    0% {
-      opacity: 0;
-      transform: translateY(-20px);
+    :root {
+      --primary: #6C63FF;
+      --primary-dark: #4D44DB;
+      --secondary: #FF6584;
+      --dark: #1E1E2C;
+      --light: #F8F9FA;
+      --gray: #6C757D;
+      --light-gray: #E9ECEF;
+      --success: #28A745;
+      --danger: #DC3545;
+      --warning: #FD7E14;
+      --info: #17A2B8;
     }
-    100% {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
 
-  /* Responsive */
-  @media (min-width: 768px) {
-    main {
-      padding: 0 2rem;
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Poppins', sans-serif;
     }
-    .hero {
-      flex-direction: row;
-      text-align: left;
-      gap: 3rem;
+
+    body {
+      background-color: var(--light);
+      color: var(--dark);
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    /* Header */
+    header {
+      background-color: white;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
+
+    .header-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
       align-items: center;
     }
-    .hero-text {
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .logo img {
+      height: 40px;
+    }
+
+    .logo-text {
+      font-weight: 700;
+      font-size: 1.5rem;
+      color: var(--primary);
+    }
+
+    .logo-text span {
+      color: var(--dark);
+    }
+
+    nav {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 1.5rem;
+    }
+
+    .nav-links a {
+      color: var(--dark);
+      font-weight: 500;
+      text-decoration: none;
+      transition: color 0.3s;
+      position: relative;
+    }
+
+    .nav-links a:hover {
+      color: var(--primary);
+    }
+
+    .nav-links a.active {
+      color: var(--primary);
+      font-weight: 600;
+    }
+
+    .nav-links a.active::after {
+      content: '';
+      position: absolute;
+      bottom: -5px;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background-color: var(--primary);
+    }
+
+    .auth-buttons {
+      display: flex;
+      gap: 1rem;
+    }
+
+    .btn {
+      padding: 0.5rem 1.25rem;
+      border-radius: 30px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s;
+      text-align: center;
+      border: none;
+      outline: none;
+    }
+
+    .btn-login {
+      background-color: transparent;
+      color: var(--primary);
+      border: 1px solid var(--primary);
+    }
+
+    .btn-login:hover {
+      background-color: rgba(108, 99, 255, 0.1);
+    }
+
+    .btn-signup {
+      background-color: var(--primary);
+      color: white;
+    }
+
+    .btn-signup:hover {
+      background-color: var(--primary-dark);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(108, 99, 255, 0.3);
+    }
+
+    .mobile-menu-btn {
+      display: none;
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      color: var(--dark);
+      cursor: pointer;
+    }
+
+    /* Hero Section */
+    .hero {
+      background: linear-gradient(135deg, rgba(108, 99, 255, 0.1) 0%, rgba(255, 101, 132, 0.1) 100%);
+      padding: 4rem 2rem;
+    }
+
+    .hero-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      gap: 3rem;
+    }
+
+    .hero-content {
       flex: 1;
     }
-    .hero img {
-      flex: 1;
+
+    .hero-title {
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: var(--dark);
+      margin-bottom: 1.5rem;
+      line-height: 1.2;
+    }
+
+    .hero-title span {
+      color: var(--primary);
+    }
+
+    .hero-subtitle {
+      font-size: 1.125rem;
+      color: var(--gray);
+      margin-bottom: 2rem;
       max-width: 600px;
     }
-  }
-  @media (max-width: 480px) {
-    header h1 {
-      font-size: 1.4rem;
+
+    .hero-buttons {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 2rem;
     }
-    nav a {
-      font-size: 0.9rem;
-      padding: 0.4rem 1rem;
+
+    .btn-primary {
+      background-color: var(--primary);
+      color: white;
+      padding: 0.75rem 1.5rem;
+      font-size: 1rem;
+      border-radius: 8px;
     }
-    .hero h2 {
+
+    .btn-secondary {
+      background-color: white;
+      color: var(--primary);
+      padding: 0.75rem 1.5rem;
+      font-size: 1rem;
+      border-radius: 8px;
+      border: 1px solid var(--primary);
+    }
+
+    .hero-stats {
+      display: flex;
+      gap: 2rem;
+    }
+
+    .stat-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .stat-icon {
+      color: var(--primary);
+      font-size: 1.5rem;
+    }
+
+    .stat-number {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--dark);
+    }
+
+    .stat-label {
+      font-size: 0.875rem;
+      color: var(--gray);
+    }
+
+    /* Services Section */
+    .services {
+      padding: 4rem 2rem;
+      background-color: white;
+    }
+
+    .section-title {
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+
+    .section-title h2 {
       font-size: 2rem;
+      font-weight: 700;
+      color: var(--dark);
+      margin-bottom: 1rem;
     }
-    .feature-title {
+
+    .section-title p {
+      color: var(--gray);
+      max-width: 700px;
+      margin: 0 auto;
+    }
+
+    .services-grid {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2rem;
+    }
+
+    .service-card {
+      background-color: var(--light);
+      border-radius: 10px;
+      padding: 2rem;
+      transition: transform 0.3s, box-shadow 0.3s;
+      border: 1px solid var(--light-gray);
+    }
+
+    .service-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .service-icon {
+      font-size: 2.5rem;
+      color: var(--primary);
+      margin-bottom: 1.5rem;
+    }
+
+    .service-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      color: var(--dark);
+    }
+
+    .service-description {
+      color: var(--gray);
+      margin-bottom: 1.5rem;
+    }
+
+    .service-link {
+      color: var(--primary);
+      font-weight: 500;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: color 0.3s;
+    }
+
+    .service-link:hover {
+      color: var(--primary-dark);
+    }
+
+    /* Features Section */
+    .features {
+      padding: 4rem 2rem;
+      background-color: var(--light);
+    }
+
+    .features-container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .feature-tabs {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      margin-bottom: 3rem;
+    }
+
+    .tab-btn {
+      padding: 0.75rem 1.5rem;
+      background-color: transparent;
+      border: none;
+      border-radius: 30px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .tab-btn.active {
+      background-color: var(--primary);
+      color: white;
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2rem;
+    }
+
+    .feature-item {
+      background-color: white;
+      border-radius: 10px;
+      padding: 2rem;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    }
+
+    .feature-item h3 {
+      font-size: 1.25rem;
+      margin-bottom: 1rem;
+      color: var(--dark);
+    }
+
+    .feature-item p {
+      color: var(--gray);
+    }
+
+    /* Pricing Section */
+    .pricing {
+      padding: 4rem 2rem;
+      background-color: white;
+    }
+
+    .pricing-grid {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2rem;
+    }
+
+    .pricing-card {
+      background-color: var(--light);
+      border-radius: 10px;
+      padding: 2rem;
+      text-align: center;
+      border: 1px solid var(--light-gray);
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+
+    .pricing-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .pricing-card.popular {
+      border: 2px solid var(--primary);
+      position: relative;
+    }
+
+    .popular-badge {
+      position: absolute;
+      top: -15px;
+      right: 20px;
+      background-color: var(--primary);
+      color: white;
+      padding: 0.25rem 1rem;
+      border-radius: 30px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .pricing-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+    }
+
+    .pricing-price {
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: var(--primary);
+      margin-bottom: 1.5rem;
+    }
+
+    .pricing-price span {
+      font-size: 1rem;
+      color: var(--gray);
+    }
+
+    .pricing-features {
+      margin-bottom: 2rem;
+    }
+
+    .pricing-features li {
+      list-style: none;
+      margin-bottom: 0.75rem;
+      color: var(--gray);
+    }
+
+    .pricing-features li i {
+      color: var(--success);
+      margin-right: 0.5rem;
+    }
+
+    /* Testimonials */
+    .testimonials {
+      padding: 4rem 2rem;
+      background-color: var(--light);
+    }
+
+    .testimonials-container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .testimonial-slider {
+      display: flex;
+      gap: 2rem;
+      overflow-x: auto;
+      padding: 1rem 0;
+      scroll-snap-type: x mandatory;
+    }
+
+    .testimonial-slider::-webkit-scrollbar {
+      height: 8px;
+    }
+
+    .testimonial-slider::-webkit-scrollbar-track {
+      background: var(--light-gray);
+    }
+
+    .testimonial-slider::-webkit-scrollbar-thumb {
+      background-color: var(--primary);
+      border-radius: 10px;
+    }
+
+    .testimonial-card {
+      min-width: 300px;
+      background-color: white;
+      border-radius: 10px;
+      padding: 2rem;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+      scroll-snap-align: start;
+    }
+
+    .testimonial-text {
+      font-style: italic;
+      color: var(--gray);
+      margin-bottom: 1.5rem;
+    }
+
+    .testimonial-author {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .author-avatar {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+
+    .author-info h4 {
+      font-weight: 600;
+      color: var(--dark);
+    }
+
+    .author-info p {
+      font-size: 0.875rem;
+      color: var(--gray);
+    }
+
+    /* CTA Section */
+    .cta {
+      padding: 4rem 2rem;
+      background-color: var(--primary);
+      color: white;
+      text-align: center;
+    }
+
+    .cta-container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .cta h2 {
+      font-size: 2rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .cta p {
+      margin-bottom: 2rem;
+      opacity: 0.9;
+    }
+
+    .cta-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+    }
+
+    .btn-light {
+      background-color: white;
+      color: var(--primary);
+      padding: 0.75rem 1.5rem;
+      border-radius: 8px;
+    }
+
+    .btn-outline-light {
+      background-color: transparent;
+      color: white;
+      padding: 0.75rem 1.5rem;
+      border-radius: 8px;
+      border: 1px solid white;
+    }
+
+    /* Footer */
+    footer {
+      background-color: var(--dark);
+      color: white;
+      padding: 4rem 2rem 2rem;
+    }
+
+    .footer-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 2rem;
+    }
+
+    .footer-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 1rem;
+    }
+
+    .footer-logo img {
+      height: 30px;
+    }
+
+    .footer-logo-text {
+      font-weight: 700;
+      font-size: 1.25rem;
+      color: white;
+    }
+
+    .footer-about p {
+      color: rgba(255, 255, 255, 0.7);
+      margin-bottom: 1.5rem;
+    }
+
+    .footer-social {
+      display: flex;
+      gap: 1rem;
+    }
+
+    .footer-social a {
+      color: white;
+      font-size: 1.25rem;
+      transition: color 0.3s;
+    }
+
+    .footer-social a:hover {
+      color: var(--primary);
+    }
+
+    .footer-links h3 {
       font-size: 1.125rem;
+      font-weight: 600;
+      margin-bottom: 1.5rem;
     }
-  }
+
+    .footer-links ul {
+      list-style: none;
+    }
+
+    .footer-links li {
+      margin-bottom: 0.75rem;
+    }
+
+    .footer-links a {
+      color: rgba(255, 255, 255, 0.7);
+      text-decoration: none;
+      transition: color 0.3s;
+    }
+
+    .footer-links a:hover {
+      color: white;
+    }
+
+    .footer-contact h3 {
+      font-size: 1.125rem;
+      font-weight: 600;
+      margin-bottom: 1.5rem;
+    }
+
+    .contact-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+      color: rgba(255, 255, 255, 0.7);
+    }
+
+    .contact-item i {
+      margin-top: 3px;
+    }
+
+    .footer-bottom {
+      max-width: 1200px;
+      margin: 3rem auto 0;
+      padding-top: 2rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      text-align: center;
+      color: rgba(255, 255, 255, 0.5);
+      font-size: 0.875rem;
+    }
+
+    /* Responsive */
+    @media (max-width: 992px) {
+      .hero-container {
+        flex-direction: column;
+      }
+      
+      .hero-content {
+        text-align: center;
+      }
+      
+      .hero-buttons {
+        justify-content: center;
+      }
+      
+      .hero-stats {
+        justify-content: center;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .mobile-menu-btn {
+        display: block;
+      }
+      
+      .nav-links {
+        display: none;
+      }
+      
+      .nav-links.active {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        top: 70px;
+        left: 0;
+        width: 100%;
+        background-color: white;
+        padding: 1rem;
+        box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
+      }
+      
+      .hero-title {
+        font-size: 2rem;
+      }
+      
+      .section-title h2 {
+        font-size: 1.75rem;
+      }
+    }
+
+    @media (max-width: 576px) {
+      .header-container {
+        padding: 1rem;
+      }
+      
+      .hero {
+        padding: 3rem 1rem;
+      }
+      
+      .hero-buttons {
+        flex-direction: column;
+      }
+      
+      .hero-stats {
+        flex-direction: column;
+        align-items: center;
+      }
+      
+      .cta-buttons {
+        flex-direction: column;
+      }
+      
+      .footer-container {
+        grid-template-columns: 1fr;
+      }
+    }
   </style>
- </head>
- <body>
-  <canvas id="background-dots" aria-hidden="true"></canvas>
+</head>
+<body>
+  <!-- Header -->
   <header>
-   <h1>V-PEDIA</h1>
-   <nav>
-    <a aria-label="Login ke akun" class="login" href="/auth/login">
-     <i aria-hidden="true" class="fas fa-sign-in-alt">
-     </i>Login</a>
-    <a aria-label="Daftar akun baru" class="signup" href="/auth/register">
-     <i aria-hidden="true" class="fas fa-user-plus">
-     </i>Daftar</a>
-   </nav>
-  </header>
-  <main>
-   <section aria-label="Tentang layanan topup dan integrasi H2H" class="hero">
-    <div class="hero-text">
-     <h2>Solusi Topup dan Integrasi H2H Terpercaya</h2>
-     <p>Kami menyediakan layanan topup pulsa, paket data, dan pembayaran digital dengan integrasi H2H (host-to-host) yang cepat, aman, dan mudah digunakan. Platform kami dirancang untuk memudahkan bisnis Anda dalam mengelola transaksi secara otomatis dan real-time.</p>
+    <div class="header-container">
+      <div class="logo">
+        <img src="https://files.catbox.moe/oj984n.png" alt="V-PEDIA Logo">
+        <div class="logo-text">V-<span>PEDIA</span></div>
+      </div>
+      
+      <nav>
+        <button class="mobile-menu-btn">
+          <i class="fas fa-bars"></i>
+        </button>
+        
+        <div class="nav-links">
+          <a href="/" class="active">Beranda</a>
+          <a href="#layanan">Layanan</a>
+          <a href="#fitur">Fitur</a>
+          <a href="#harga">Harga</a>
+          <a href="https://wa.me/6285216955233">Kontak</a>
+        </div>
+        
+        <div class="auth-buttons">
+          <button class="btn btn-login" onclick="window.location.href='/auth/login'">LogIn <i class="fas fa-sign-in-alt"></i></button>
+          <button class="btn btn-signup" onclick="window.location.href='/auth/register'">Register <i class="fas fa-user-plus"></i></button>
+        </div>
+      </nav>
     </div>
-    <img alt="Ilustrasi digital yang menggambarkan proses topup pulsa dan integrasi host-to-host dengan perangkat komputer dan jaringan data, menampilkan komputer, jaringan, dan ikon digital" height="400" src="https://files.catbox.moe/o52sqb.jpg" tabindex="0" width="600"/>
-   </section>
-   <section aria-label="Fitur utama layanan" class="features">
-    <article class="feature-card" tabindex="0">
-     <i aria-hidden="true" class="fas fa-bolt feature-icon">
-     </i>
-     <h3 class="feature-title">Topup Pulsa Instan</h3>
-     <p class="feature-desc">Isi ulang pulsa dan paket data dengan proses instan tanpa menunggu lama, mendukung berbagai operator di Indonesia.</p>
-    </article>
-    <article class="feature-card" tabindex="0">
-     <i aria-hidden="true" class="fas fa-network-wired feature-icon">
-     </i>
-     <h3 class="feature-title">Integrasi H2H Otomatis</h3>
-     <p class="feature-desc">Hubungkan sistem Anda langsung dengan server kami menggunakan protokol host-to-host untuk transaksi otomatis dan real-time.</p>
-    </article>
-    <article class="feature-card" tabindex="0">
-     <i aria-hidden="true" class="fas fa-shield-alt feature-icon">
-     </i>
-     <h3 class="feature-title">Keamanan Terjamin</h3>
-     <p class="feature-desc">Sistem kami dilengkapi dengan enkripsi dan proteksi terbaik untuk menjaga keamanan data dan transaksi Anda.</p>
-    </article>
-    <article class="feature-card" tabindex="0">
-     <i aria-hidden="true" class="fas fa-mobile-alt feature-icon">
-     </i>
-     <h3 class="feature-title">Dashboard User Friendly</h3>
-     <p class="feature-desc">Kelola transaksi dan laporan dengan mudah melalui dashboard yang intuitif dan responsif di berbagai perangkat.</p>
-    </article>
-    <article class="feature-card" tabindex="0">
-     <i aria-hidden="true" class="fas fa-headset feature-icon">
-     </i>
-     <h3 class="feature-title">Dukungan Pelanggan 24/7</h3>
-     <p class="feature-desc">Tim support kami siap membantu Anda kapan saja melalui chat, email, atau telepon.</p>
-    </article>
-    <article class="feature-card" tabindex="0">
-     <i aria-hidden="true" class="fas fa-cogs feature-icon">
-     </i>
-     <h3 class="feature-title">Customizable API</h3>
-     <p class="feature-desc">API kami dapat disesuaikan dengan kebutuhan bisnis Anda untuk integrasi yang lebih fleksibel dan efisien.</p>
-    </article>
-   </section>
-  </main>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="hero-container">
+      <div class="hero-content">
+        <h1 class="hero-title">Solusi Topup & Integrasi <span>H2H Terbaik</span></h1>
+        <p class="hero-subtitle">
+          Layanan topup game, pulsa, paket data, dan pembayaran digital lain nya dengan integrasi H2H yang cepat, aman, dan mudah digunakan.
+        </p>
+        
+        <div class="hero-buttons">
+          <button class="btn btn-primary" onclick="window.location.href='/auth/register'">Mulai Sekarang</button>
+          <button class="btn btn-secondary" onclick="window.location.href='/auth/register'">Pelajari Lebih Lanjut</button>
+        </div>
+        
+        <div class="hero-stats">
+          <div class="stat-item">
+            <div class="stat-icon">
+              <i class="fas fa-users"></i>
+            </div>
+            <div>
+              <div class="stat-number">10K+</div>
+              <div class="stat-label">Pengguna</div>
+            </div>
+          </div>
+          
+          <div class="stat-item">
+            <div class="stat-icon">
+              <i class="fas fa-exchange-alt"></i>
+            </div>
+            <div>
+              <div class="stat-number">500K+</div>
+              <div class="stat-label">Transaksi</div>
+            </div>
+          </div>
+          
+          <div class="stat-item">
+            <div class="stat-icon">
+              <i class="fas fa-plug"></i>
+            </div>
+            <div>
+              <div class="stat-number">50+</div>
+              <div class="stat-label">Integrasi</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+    </div>
+  </section>
+
+  <!-- Services Section -->
+  <section class="services" id="layanan">
+    <div class="section-title">
+      <h2>Layanan Kami</h2>
+      <p>Kami menyediakan berbagai layanan untuk memenuhi kebutuhan bisnis digital Anda</p>
+    </div>
+    
+    <div class="services-grid">
+      <div class="service-card">
+        <div class="service-icon">
+          <i class="fas fa-mobile-alt"></i>
+        </div>
+        <h3 class="service-title">Topup Pulsa & Data</h3>
+        <p class="service-description">
+          Isi ulang pulsa dan paket data semua operator dengan proses instan dan harga kompetitif.
+        </p>
+        <a href="#" class="service-link">
+          Selengkapnya <i class="fas fa-arrow-right"></i>
+        </a>
+      </div>
+      
+      <div class="service-card">
+        <div class="service-icon">
+          <i class="fas fa-mobile-alt"></i>
+        </div>
+        <h3 class="service-title">Topup Game Online</h3>
+        <p class="service-description">
+          TopUp game online secara instan dan integrasi H2H dengan cepat dan aman mudah di gunakan.
+        </p>
+        <a href="#" class="service-link">
+          Selengkapnya <i class="fas fa-arrow-right"></i>
+        </a>
+      </div>
+      
+      <div class="service-card">
+        <div class="service-icon">
+          <i class="fas fa-network-wired"></i>
+        </div>
+        <h3 class="service-title">Integrasi H2H</h3>
+        <p class="service-description">
+          Hubungkan sistem Anda langsung dengan server kami untuk transaksi otomatis dan real-time.
+        </p>
+        <a href="#" class="service-link">
+          Selengkapnya <i class="fas fa-arrow-right"></i>
+        </a>
+      </div>
+      
+      <div class="service-card">
+        <div class="service-icon">
+          <i class="fas fa-wallet"></i>
+        </div>
+        <h3 class="service-title">Pembayaran Digital</h3>
+        <p class="service-description">
+          Layanan pembayaran digital lengkap untuk berbagai kebutuhan transaksi online Anda.
+        </p>
+        <a href="#" class="service-link">
+          Selengkapnya <i class="fas fa-arrow-right"></i>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section class="features" id="fitur">
+    <div class="features-container">
+      <div class="section-title">
+        <h2>Fitur Unggulan</h2>
+        <p>Temukan fitur-fitur canggih yang membuat layanan kami berbeda</p>
+      </div>
+      
+      <div class="feature-tabs">
+        <button class="tab-btn active" data-tab="tab1">Kecepatan</button>
+        <button class="tab-btn" data-tab="tab2">Keamanan</button>
+        <button class="tab-btn" data-tab="tab3">Kemudahan</button>
+      </div>
+      
+      <div class="tab-content active" id="tab1">
+        <div class="feature-grid">
+          <div class="feature-item">
+            <h3>Proses Instan</h3>
+            <p>Transaksi selesai dalam hitungan detik dengan teknologi terbaru kami.</p>
+          </div>
+          
+          <div class="feature-item">
+            <h3>Server Cepat</h3>
+            <p>Didukung oleh server berkecepatan tinggi dengan uptime 99.9%.</p>
+          </div>
+          
+          <div class="feature-item">
+            <h3>API Responsif</h3>
+            <p>API kami memberikan response time kurang dari 500ms untuk setiap request.</p>
+          </div>
+        </div>
+      </div>
+      
+      <div class="tab-content" id="tab2">
+        <div class="feature-grid">
+          <div class="feature-item">
+            <h3>Enkripsi Data</h3>
+            <p>Semua data transaksi dienkripsi dengan standar keamanan tertinggi.</p>
+          </div>
+          
+          <div class="feature-item">
+            <h3>Two-Factor Auth</h3>
+            <p>Dukungan autentikasi dua faktor untuk keamanan ekstra.</p>
+          </div>
+          
+          <div class="feature-item">
+            <h3>Audit Log</h3>
+            <p>Catatan lengkap semua aktivitas untuk pelacakan dan analisis.</p>
+          </div>
+        </div>
+      </div>
+      
+      <div class="tab-content" id="tab3">
+        <div class="feature-grid">
+          <div class="feature-item">
+            <h3>Dashboard Intuitif</h3>
+            <p>Kelola semua transaksi dengan mudah melalui dashboard yang user-friendly.</p>
+          </div>
+          
+          <div class="feature-item">
+            <h3>Dokumentasi Lengkap</h3>
+            <p>Dokumentasi API yang lengkap dengan contoh kode untuk berbagai bahasa.</p>
+          </div>
+          
+          <div class="feature-item">
+            <h3>Support 24/7</h3>
+            <p>Tim support kami siap membantu Anda kapan saja melalui berbagai channel.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Pricing Section -->
+  <section class="pricing" id="harga">
+    <div class="section-title">
+      <h2>Paket Harga</h2>
+      <p>Pilih paket yang sesuai dengan kebutuhan bisnis Anda</p>
+    </div>
+    
+    <div class="pricing-grid">
+      <div class="pricing-card">
+        <h3 class="pricing-title">Starter</h3>
+        <div class="pricing-price">Rp50.000<span>/bulan</span></div>
+        <ul class="pricing-features">
+          <li><i class="fas fa-check"></i> 100 Transaksi/bulan</li>
+          <li><i class="fas fa-check"></i> Support Email</li>
+          <li><i class="fas fa-check"></i> Dashboard Dasar</li>
+          <li><i class="fas fa-check"></i> API Access</li>
+        </ul>
+        <button class="btn btn-primary">Pilih Paket</button>
+      </div>
+      
+      <div class="pricing-card popular">
+        <div class="popular-badge">POPULAR</div>
+        <h3 class="pricing-title">Professional</h3>
+        <div class="pricing-price">Rp150.000<span>/bulan</span></div>
+        <ul class="pricing-features">
+          <li><i class="fas fa-check"></i> 500 Transaksi/bulan</li>
+          <li><i class="fas fa-check"></i> Priority Support</li>
+          <li><i class="fas fa-check"></i> Dashboard Lengkap</li>
+          <li><i class="fas fa-check"></i> API Access</li>
+          <li><i class="fas fa-check"></i> Laporan Bulanan</li>
+        </ul>
+        <button class="btn btn-primary">Pilih Paket</button>
+      </div>
+      
+      <div class="pricing-card">
+        <h3 class="pricing-title">Enterprise</h3>
+        <div class="pricing-price">Rp500.000<span>/bulan</span></div>
+        <ul class="pricing-features">
+          <li><i class="fas fa-check"></i> Transaksi Unlimited</li>
+          <li><i class="fas fa-check"></i> 24/7 Support</li>
+          <li><i class="fas fa-check"></i> Dashboard Premium</li>
+          <li><i class="fas fa-check"></i> API Access</li>
+          <li><i class="fas fa-check"></i> Laporan Real-time</li>
+          <li><i class="fas fa-check"></i> Dedicated Account Manager</li>
+        </ul>
+        <button class="btn btn-primary">Pilih Paket</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Testimonials -->
+  <section class="testimonials">
+    <div class="testimonials-container">
+      <div class="section-title">
+        <h2>Apa Kata Mereka</h2>
+        <p>Testimoni dari pelanggan yang telah menggunakan layanan kami</p>
+      </div>
+      
+      <div class="testimonial-slider">
+        <div class="testimonial-card">
+          <p class="testimonial-text">
+            "Layanan topup dari V-PEDIA sangat cepat dan harga kompetitif. Integrasi H2H-nya juga mudah diimplementasikan."
+          </p>
+          <div class="testimonial-author">
+            <img src="https://via.placeholder.com/50x50" alt="Author" class="author-avatar">
+            <div class="author-info">
+              <h4>Budi Santoso</h4>
+              <p>Pemilik Toko Pulsa</p>
+            </div>
+          </div>
+        </div>
+        
+        <div class="testimonial-card">
+          <p class="testimonial-text">
+            "API yang responsif dan dokumentasi lengkap membuat integrasi dengan sistem kami berjalan lancar."
+          </p>
+          <div class="testimonial-author">
+            <img src="https://via.placeholder.com/50x50" alt="Author" class="author-avatar">
+            <div class="author-info">
+              <h4>Ani Wijaya</h4>
+              <p>Developer Aplikasi</p>
+            </div>
+          </div>
+        </div>
+        
+        <div class="testimonial-card">
+          <p class="testimonial-text">
+            "Support yang responsif dan solutif. Sangat membantu ketika kami mengalami kendala teknis."
+          </p>
+          <div class="testimonial-author">
+            <img src="https://via.placeholder.com/50x50" alt="Author" class="author-avatar">
+            <div class="author-info">
+              <h4>Rudi Hartono</h4>
+              <p>Manajer IT</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="cta">
+    <div class="cta-container">
+      <h2>Siap Meningkatkan Bisnis Anda?</h2>
+      <p>Daftar sekarang dan dapatkan akses ke semua fitur unggulan kami</p>
+      
+      <div class="cta-buttons">
+        <button class="btn btn-light">Mulai Sekarang</button>
+        <button class="btn btn-outline-light">Hubungi Kami</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
   <footer>
-   <div class="footer-container" role="contentinfo">
-    <section aria-labelledby="footer-about" class="footer-section">
-     <h4 id="footer-about">
-      Tentang Kami
-     </h4>
-     <p>
-      V-PEDIA adalah platform terpercaya yang menyediakan layanan topup pulsa dan integrasi H2H untuk memudahkan bisnis Anda dalam transaksi digital.
-     </p>
-    </section>
-    <section aria-labelledby="footer-links" class="footer-section">
-     <h4 id="footer-links">Tautan Cepat</h4>
-     <ul>
-      <li>
-       <a aria-label="Beranda" href="/auth/register"><i class="fa-solid fa-angle-right"></i> Beranda</a>
-      </li>
-      <li>
-       <a aria-label="Fitur" href="/auth/register"><i class="fa-solid fa-angle-right"></i> Fitur</a>
-      </li>
-      <li>
-       <a aria-label="Harga" href="/auth/register"><i class="fa-solid fa-angle-right"></i> Harga</a>
-      </li>
-      <li>
-       <a aria-label="Kontak" href="https://t.me/rerezz_official"><i class="fa-solid fa-angle-right"></i> Kontak</a>
-      </li>
-      <li>
-       <a aria-label="Bantuan" href="https://wa.me/6285216955233"><i class="fa-solid fa-angle-right"></i> Bantuan</a>
-      </li>
-     </ul>
-    </section>
-    <section aria-labelledby="footer-contact" class="footer-section">
-     <h4 id="footer-contact">Kontak Kami</h4>
-     <ul>
-      <li>
-       <i aria-hidden="true" class="fas fa-map-marker-alt">
-       </i>Kota Sukabumi, Jawa Barat, Indonesia</li>
-      <li>
-       <i aria-hidden="true" class="fas fa-phone-alt"></i>
-       <a aria-label="Telepon +62 21 1234 5678" href="tel:+6285216955233">+62 852 1695 5233</a>
-      </li>
-      <li>
-       <i aria-hidden="true" class="fas fa-envelope"></i>
-       <a aria-label="Email rerezzofficial@gmail.com" href="mailto:rerezzofficial@gmail.com">rerezzofficial@gmail.com</a>
-      </li>
-     </ul>
-     <div aria-label="Sosial media" class="footer-social">
-      <a aria-label="Facebook" href="#" rel="noopener" target="_blank">
-       <i class="fab fa-facebook-f"></i>
-      </a>
-      <a aria-label="Twitter" href="#" rel="noopener" target="_blank">
-       <i class="fab fa-twitter"></i>
-      </a>
-      <a aria-label="Instagram" href="#" rel="noopener" target="_blank">
-       <i class="fab fa-instagram"></i>
-      </a>
-      <a aria-label="LinkedIn" href="#" rel="noopener" target="_blank">
-       <i class="fab fa-linkedin-in"></i>
-      </a>
-     </div>
-    </section>
-   </div>
-   <div class="footer-bottom" role="contentinfo">
-    © 2024 V-PEDIA. Semua hak cipta dilindungi.
-   </div>
+    <div class="footer-container">
+      <div class="footer-about">
+        <div class="footer-logo">
+          <img src="https://via.placeholder.com/30x30" alt="V-PEDIA Logo">
+          <div class="footer-logo-text">V-PEDIA</div>
+        </div>
+        <p>
+          Platform terdepan untuk layanan topup dan integrasi H2H dengan teknologi terkini.
+        </p>
+        <div class="footer-social">
+          <a href="#"><i class="fab fa-facebook-f"></i></a>
+          <a href="#"><i class="fab fa-twitter"></i></a>
+          <a href="#"><i class="fab fa-instagram"></i></a>
+          <a href="#"><i class="fab fa-linkedin-in"></i></a>
+        </div>
+      </div>
+      
+      <div class="footer-links">
+        <h3>Tautan Cepat</h3>
+        <ul>
+          <li><a href="#">Beranda</a></li>
+          <li><a href="#">Tentang Kami</a></li>
+          <li><a href="#">Layanan</a></li>
+          <li><a href="#">Fitur</a></li>
+          <li><a href="#">Harga</a></li>
+        </ul>
+      </div>
+      
+      <div class="footer-links">
+        <h3>Layanan</h3>
+        <ul>
+          <li><a href="#">Topup Pulsa</a></li>
+          <li><a href="#">Paket Data</a></li>
+          <li><a href="#">Pembayaran Digital</a></li>
+          <li><a href="#">Integrasi H2H</a></li>
+          <li><a href="#">API Developer</a></li>
+        </ul>
+      </div>
+      
+      <div class="footer-contact">
+        <h3>Kontak Kami</h3>
+        <div class="contact-item">
+          <i class="fas fa-map-marker-alt"></i>
+          <span>Jl. Contoh No. 123, Kota Sukabumi, Jawa Barat</span>
+        </div>
+        <div class="contact-item">
+          <i class="fas fa-phone-alt"></i>
+          <a href="tel:+6285216955233">+62 852 1695 5233</a>
+        </div>
+        <div class="contact-item">
+          <i class="fas fa-envelope"></i>
+          <a href="mailto:rerezzofficial@gmail.com">rerezzofficial@gmail.com</a>
+        </div>
+      </div>
+    </div>
+    
+    <div class="footer-bottom">
+      &copy; 2024 V-PEDIA. All Rights Reserved.
+    </div>
   </footer>
+
   <script>
-   // Background dots animation
-const canvas = document.getElementById('background-dots');
-const ctx = canvas.getContext('2d');
-let width, height;
-let dots = [];
-
-function random(min, max) {
-  return Math.random() * (max - min) + min;
-}
-
-class Dot {
-  constructor() {
-    this.x = random(0, width);
-    this.y = random(0, height);
-    this.radius = random(1, 3);
-    this.speedX = random(-0.3, 0.3);
-    this.speedY = random(-0.3, 0.3);
-    this.alpha = random(0.1, 0.5);
-    this.alphaChange = random(0.002, 0.005);
-    this.alphaDirection = 1;
-  }
-  update() {
-    this.x += this.speedX;
-    this.y += this.speedY;
-
-    if (this.x < 0 || this.x > width) this.speedX *= -1;
-    if (this.y < 0 || this.y > height) this.speedY *= -1;
-
-    this.alpha += this.alphaChange * this.alphaDirection;
-    if (this.alpha >= 0.5) this.alphaDirection = -1;
-    else if (this.alpha <= 0.1) this.alphaDirection = 1;
-  }
-  draw() {
-    ctx.beginPath();
-    ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-    ctx.fillStyle = `rgba(37, 99, 235, ${this.alpha})`;
-    ctx.fill();
-  }
-}
-
-function initDots() {
-  dots = [];
-  const count = Math.floor((window.innerWidth * window.innerHeight) / 8000);
-  for (let i = 0; i < count; i++) {
-    dots.push(new Dot());
-  }
-}
-
-function resize() {
-  width = window.innerWidth;
-  height = window.innerHeight;
-  canvas.width = width;
-  canvas.height = height;
-  initDots();
-}
-
-function animate() {
-  ctx.clearRect(0, 0, width, height);
-  dots.forEach(dot => {
-    dot.update();
-    dot.draw();
-  });
-  requestAnimationFrame(animate);
-}
-
-resize();
-animate();
-window.addEventListener('resize', resize);
-
-// Scroll reveal animation
-function isInViewport(el) {
-  const rect = el.getBoundingClientRect();
-  return (
-    rect.top <= (window.innerHeight || document.documentElement.clientHeight) * 0.85 &&
-    rect.bottom >= 0
-  );
-}
-
-function scrollReveal() {
-  const heroText = document.querySelector('.hero-text');
-  const heroImg = document.querySelector('.hero img');
-  const features = document.querySelectorAll('.feature-card');
-
-  if (isInViewport(heroText)) {
-    heroText.classList.add('visible');
-  }
-  if (isInViewport(heroImg)) {
-    heroImg.classList.add('visible');
-  }
-  features.forEach((feature, i) => {
-    if (isInViewport(feature)) {
-      setTimeout(() => {
-        feature.classList.add('visible');
-      }, i * 150);
-    }
-  });
-}
-
-window.addEventListener('scroll', scrollReveal);
-window.addEventListener('load', scrollReveal);
+    // Mobile Menu Toggle
+    const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
+    const navLinks = document.querySelector('.nav-links');
+    
+    mobileMenuBtn.addEventListener('click', () => {
+      navLinks.classList.toggle('active');
+    });
+    
+    // Tab Feature
+    const tabBtns = document.querySelectorAll('.tab-btn');
+    const tabContents = document.querySelectorAll('.tab-content');
+    
+    tabBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        // Remove active class from all buttons and contents
+        tabBtns.forEach(btn => btn.classList.remove('active'));
+        tabContents.forEach(content => content.classList.remove('active'));
+        
+        // Add active class to clicked button and corresponding content
+        btn.classList.add('active');
+        const tabId = btn.getAttribute('data-tab');
+        document.getElementById(tabId).classList.add('active');
+      });
+    });
+    
+    // Testimonial Slider Navigation (simple version)
+    // For a complete slider, consider using a library like Swiper.js
   </script>
- </body>
+</body>
 </html>
