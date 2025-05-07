@@ -3,8 +3,7 @@
 <head>
   <meta charset="utf-8"/>
   <meta content="width=device-width, initial-scale=1" name="viewport"/>
-  <title>User Profile - Rerozz Hosting</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <title>User Profile - V-Pedia</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
   <style>
@@ -14,43 +13,422 @@
       color: #212529;
       line-height: 1.6;
       min-height: 100vh;
+      padding: 20px;
     }
-    /* Scrollbar hidden for tabs */
-    .no-scrollbar::-webkit-scrollbar {
-      display: none;
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 10px;
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      gap: 24px;
     }
-    .no-scrollbar {
-      -ms-overflow-style: none;
-      scrollbar-width: none;
-    }
-    /* Fade in animation for cards */
-    @keyframes fadeIn {
-      from {
-        opacity: 0;
-        transform: translateY(10px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
+    @media (max-width: 768px) {
+      .container {
+        grid-template-columns: 1fr;
+        gap: 16px;
       }
     }
-    .fade-in {
-      animation: fadeIn 0.3s ease-out forwards;
+    .sidebar {
+      background-color: #fff;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      padding: 24px;
+      position: sticky;
+      top: 24px;
+      align-self: flex-start;
     }
-    /* Custom styles for OTP inputs */
+    @media (max-width: 768px) {
+      .sidebar {
+        position: static;
+        top: auto;
+        width: 100%;
+      }
+    }
+    .profile-header {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-bottom: 24px;
+      position: relative;
+    }
+    .profile-image-container {
+        position: relative;
+        width: 120px;
+        height: 120px;
+        margin-bottom: 16px;
+    }
+    .profile-image {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 4px solid #2563eb;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .profile-image:hover {
+        transform: scale(1.05);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+    .edit-photo-button {
+      position: absolute;
+      bottom: 8px;
+      right: 8px;
+      background-color: #2563eb;
+      color: #fff;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+      transition: transform 0.3s ease, background-color 0.3s ease;
+      border: none;
+      cursor: pointer;
+    }
+    .edit-photo-button:hover {
+        background-color: #1d4ed8;
+        transform: scale(1.1);
+    }
+     .edit-photo-button:focus {
+        outline: none;
+        box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.5);
+    }
+    .username-display {
+      margin-top: 16px;
+      font-size: 20px;
+      font-weight: 600;
+      color: #1f2937;
+      max-width: 100%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .email-display {
+      font-size: 14px;
+      color: #6b7280;
+      text-align: center;
+      word-break: break-word;
+      max-width: 100%;
+    }
+    .file-upload-info {
+      text-align: center;
+      margin-bottom: 16px;
+      font-size: 12px;
+      color: #9ca3af;
+      user-select: none;
+    }
+    .divider {
+      border-top: 1px solid #e5e7eb;
+      margin: 24px 0;
+    }
+    .form-group {
+      margin-bottom: 16px;
+    }
+    .form-group label {
+      display: block;
+      font-size: 14px;
+      font-weight: 500;
+      color: #374151;
+      margin-bottom: 4px;
+    }
+    .form-group input {
+      width: 100%;
+      border-radius: 6px;
+      border: 1px solid #d1d5db;
+      padding: 10px 12px;
+      font-size: 14px;
+      box-sizing: border-box;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    .form-group input:focus {
+      border-color: #2563eb;
+      box-shadow: 0 0 0 1px #2563eb;
+      outline: none;
+    }
+    .button-group {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-top: 24px;
+    }
+    @media (min-width: 640px) {
+      .button-group {
+        flex-direction: row;
+        gap: 12px;
+      }
+    }
+    .button {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 10px 20px;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 600;
+      transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease, opacity 0.2s ease;
+      cursor: pointer;
+      border: none;
+    }
+    .button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+    .button-primary {
+      background-color: #2563eb;
+      color: #fff;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    .button-primary:hover:not(:disabled) {
+      background-color: #1d4ed8;
+    }
+     .button-primary:focus {
+        outline: none;
+        box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.5);
+    }
+    .button-secondary {
+      background-color: #fff;
+      color: #374151;
+      border: 1px solid #d1d5db;
+    }
+    .button-secondary:hover:not(:disabled) {
+      background-color: #f3f4f6;
+    }
+     .button-secondary:focus {
+        outline: none;
+        box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.5);
+    }
+     .button-danger {
+        background-color: #dc2626;
+        color: #fff;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+     }
+     .button-danger:hover:not(:disabled) {
+        background-color: #b91c1c;
+     }
+     .button-danger:focus {
+         outline: none;
+         box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.5);
+     }
+    .main-content {
+        flex-grow: 1;
+    }
+    .back-button {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        color: #2563eb;
+        font-weight: 500;
+        margin-bottom: 24px;
+        transition: color 0.2s ease;
+        text-decoration: none;
+        border: none;
+        background: none;
+        cursor: pointer;
+        padding: 0;
+    }
+    .back-button:hover {
+        color: #1d4ed8;
+    }
+    .back-button:focus {
+        outline: none;
+        box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.5);
+        border-radius: 4px;
+    }
+    .tab-navigation {
+        display: flex;
+        border-bottom: 1px solid #e5e7eb;
+        margin-bottom: 24px;
+        overflow-x: auto;
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+    .tab-navigation::-webkit-scrollbar {
+        display: none;
+    }
+    .tab-button {
+        white-space: nowrap;
+        padding: 12px 20px;
+        font-size: 14px;
+        font-weight: 600;
+        color: #6b7280;
+        border-bottom: 2px solid transparent;
+        transition: color 0.2s ease, border-color 0.2s ease;
+        cursor: pointer;
+        background: none;
+        border-top: none;
+        border-left: none;
+        border-right: none;
+    }
+    .tab-button:hover:not([aria-selected="true"]) {
+        color: #2563eb;
+    }
+     .tab-button:focus {
+         outline: none;
+         box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.5);
+         border-radius: 4px;
+     }
+    .tab-button[aria-selected="true"] {
+        color: #2563eb;
+        border-color: #2563eb;
+    }
+    .tab-content {
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        padding: 24px;
+    }
+    .section-title {
+        font-size: 24px;
+        font-weight: 600;
+        margin-bottom: 24px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        color: #1f2937;
+    }
+    .section-title i {
+        color: #2563eb;
+    }
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 24px;
+        margin-bottom: 32px;
+    }
+    @media (max-width: 768px) {
+      .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 16px;
+      }
+    }
+    @media (max-width: 480px) {
+        .stats-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+    .stat-card {
+        background-color: #eff6ff;
+        border-radius: 8px;
+        padding: 20px;
+        text-align: center;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .stat-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+    }
+    .stat-value {
+        font-size: 24px;
+        font-weight: 800;
+        color: #2563eb;
+        margin-bottom: 4px;
+    }
+    .stat-label {
+        font-size: 14px;
+        color: #6b7280;
+    }
+    .details-table {
+        width: 100%;
+        text-align: left;
+        border-collapse: collapse;
+    }
+    .details-table th, .details-table td {
+        padding: 12px 0;
+        border-bottom: 1px solid #e5e7eb;
+    }
+    .details-table th {
+        padding-right: 24px;
+        font-weight: 500;
+        color: #374151;
+        width: 33.333%;
+    }
+    .details-table td {
+        color: #1f2937;
+    }
+     .details-table tr:last-child th, .details-table tr:last-child td {
+         border-bottom: none;
+     }
+    .status-badge {
+        display: inline-block;
+        font-size: 12px;
+        font-weight: 600;
+        padding: 4px 8px;
+        border-radius: 4px;
+    }
+    .status-badge.verified {
+        background-color: #d1fae5;
+        color: #065f46;
+    }
+    .status-badge.not-verified {
+        background-color: #fee2e2;
+        color: #991b1b;
+    }
+    .security-section-title {
+        font-size: 18px;
+        font-weight: 600;
+        margin-bottom: 8px;
+        color: #1f2937;
+    }
+    .security-section-description {
+        font-size: 14px;
+        color: #6b7280;
+        margin-bottom: 24px;
+    }
+    .password-requirements {
+        background-color: #f9fafb;
+        border-radius: 6px;
+        padding: 16px;
+        font-size: 12px;
+        color: #6b7280;
+        line-height: 1.6;
+        margin-bottom: 24px;
+    }
+     .password-requirements strong {
+         color: #374151;
+     }
+    .password-requirements ul {
+        list-style: disc;
+        list-style-position: inside;
+        margin-top: 8px;
+        padding-left: 0;
+    }
+    .password-requirements li {
+        margin-bottom: 4px;
+    }
+    .email-verification-status {
+        font-size: 14px;
+        color: #4b5563;
+        margin-bottom: 16px;
+    }
+    .otp-form {
+        margin-top: 16px;
+        padding: 16px;
+        border-radius: 8px;
+        border: 1px solid #bfdbfe;
+        background-color: #eff6ff;
+    }
+    .otp-form-description {
+        font-size: 14px;
+        color: #4b5563;
+        margin-bottom: 12px;
+    }
     .otp-input-group {
       display: flex;
-      gap: 0.5rem;
+      gap: 8px;
       justify-content: center;
       flex-wrap: wrap;
+      margin-bottom: 16px;
     }
     .otp-input {
-      width: 3rem;
-      height: 3rem;
+      width: 48px;
+      height: 48px;
       text-align: center;
-      font-size: 1.25rem;
-      border: 2px solid #e5e7eb;
-      border-radius: 0.375rem;
+      font-size: 20px;
+      border: 2px solid #d1d5db;
+      border-radius: 6px;
       transition: all 0.2s ease;
     }
     .otp-input:focus {
@@ -58,93 +436,227 @@
       box-shadow: 0 0 0 1px #2563eb;
       outline: none;
     }
-    /* Pulse animation for OTP input */
-    @keyframes pulse {
-      0%, 100% {
-        box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.7);
+    .otp-error {
+        font-size: 12px;
+        color: #dc2626;
+        margin-top: 8px;
+    }
+    .otp-form-actions {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 16px;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+    .otp-form-actions .button {
+        padding: 8px 16px;
+        font-size: 14px;
+    }
+    .otp-form-actions .button-group {
+        margin-top: 0;
+        gap: 8px;
+    }
+     .otp-form-actions .button-group .button {
+         width: auto;
+     }
+    .api-key-value {
+        position: relative;
+        background-color: #eff6ff;
+        border-radius: 6px;
+        padding: 16px;
+        font-family: monospace;
+        font-size: 14px;
+        word-break: break-word;
+        border-left: 4px solid #2563eb;
+        margin-bottom: 24px;
+        user-select: all;
+    }
+    .copy-button {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        background-color: #dbeafe;
+        color: #2563eb;
+        border-radius: 4px;
+        padding: 4px 8px;
+        font-size: 12px;
+        font-weight: 600;
+        transition: background-color 0.2s ease;
+        border: none;
+        cursor: pointer;
+    }
+    .copy-button:hover {
+        background-color: #bfdbfe;
+    }
+     .copy-button:focus {
+         outline: none;
+         box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.5);
+     }
+    .checkbox-group {
+        display: flex;
+        align-items: center;
+        margin-bottom: 24px;
+        gap: 8px;
+    }
+    .checkbox-group input[type="checkbox"] {
+        accent-color: #2563eb;
+    }
+    .security-notice {
+        font-size: 12px;
+        color: #6b7280;
+        line-height: 1.6;
+    }
+    .security-notice strong {
+        color: #374151;
+    }
+    .api-docs-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+        gap: 24px;
+    }
+    .api-doc-card {
+        background-color: #eff6ff;
+        border-radius: 8px;
+        padding: 20px;
+        cursor: pointer;
+        transition: transform 0.3s ease, background-color 0.3s ease, color 0.3s ease;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .api-doc-card:hover {
+        transform: translateY(-4px);
+        background-color: #2563eb;
+        color: #fff;
+    }
+     .api-doc-card:focus {
+         outline: none;
+         box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.5);
+     }
+    .api-doc-card i {
+        font-size: 24px;
+        margin-bottom: 12px;
+    }
+    .api-doc-card:hover i {
+        color: #fff;
+    }
+    .api-doc-card h3 {
+        font-size: 16px;
+        font-weight: 600;
+        margin-bottom: 4px;
+    }
+    .api-doc-card p {
+        font-size: 14px;
+    }
+    .notification {
+        padding: 16px;
+        margin-bottom: 24px;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 500;
+        border-left: 4px solid;
+    }
+    .notification.info {
+        background-color: #eff6ff;
+        color: #1e40af;
+        border-color: #2563eb;
+    }
+    .notification.success {
+        background-color: #d1fae5;
+        color: #065f46;
+        border-color: #10b981;
+    }
+    .notification.error {
+        background-color: #fee2e2;
+        color: #991b1b;
+        border-color: #ef4444;
+    }
+    .hidden {
+        display: none;
+    }
+     @keyframes spin {
+         0% { transform: rotate(0deg); }
+         100% { transform: rotate(360deg); }
+     }
+     .spinner {
+         animation: spin 1s linear infinite;
+     }
+     .email-change-otp-section {
+        background-color: #eff6ff;
+        border-radius: 8px;
+        padding: 16px;
+        border: 1px solid #bfdbfe;
+        margin-top: 16px;
+     }
+     .email-change-otp-section h3 {
+         font-size: 14px;
+         font-weight: 500;
+         color: #1e40af;
+         margin-bottom: 8px;
+     }
+     .email-change-otp-section p {
+         font-size: 12px;
+         color: #1c51b9;
+         margin-bottom: 12px;
+     }
+      .email-change-otp-section .otp-error {
+        font-size: 12px;
+        color: #dc2626;
+        margin-top: 8px;
       }
-      50% {
-        box-shadow: 0 0 0 10px rgba(37, 99, 235, 0);
+      .email-change-otp-section .otp-form-actions {
+          margin-top: 16px;
       }
-    }
-    .pulse {
-      animation: pulse 1.5s infinite;
-    }
-  /* Responsive adjustments */
-  @media (max-width: 768px) {
-    .profile-grid {
-      grid-template-columns: 1fr;
-    }
-    .profile-stats {
-      grid-template-columns: repeat(2, 1fr);
-    }
-    .otp-input {
-      width: 2.5rem;
-      height: 2.5rem;
-      font-size: 1rem;
-    }
-    /* Disable sticky sidebar on mobile for proper scrolling */
-    aside[aria-label="User profile sidebar"] {
-      position: static !important;
-      top: auto !important;
-      width: 100% !important;
-    }
-  }
-    @media (max-width: 480px) {
-      .profile-stats {
-        grid-template-columns: 1fr;
-      }
-      .tab-buttons button {
-        padding: 0.5rem 0.75rem;
-        font-size: 0.875rem;
-      }
-    }
+       .email-change-otp-section .otp-form-actions button {
+           font-size: 12px;
+           padding: 6px 12px;
+       }
   </style>
 </head>
-<body class="min-h-screen">
-  <div class="max-w-[1200px] mx-auto p-4 md:p-6 grid md:grid-cols-[280px_1fr] gap-6 profile-grid">
-    <!-- Sidebar -->
-    <aside aria-label="User profile sidebar" class="bg-white rounded-lg shadow-md p-6 sticky top-6 self-start fade-in">
-      <div class="relative flex flex-col items-center mb-6">
-        <img alt="User profile picture" class="w-28 h-28 rounded-full object-cover border-4 border-blue-600 transition-transform duration-300 hover:scale-105 hover:shadow-lg" height="120" id="profileImage" src="https://storage.googleapis.com/a1aa/image/eeb7a435-caa4-490b-615d-d28347e264b0.jpg" width="120"/>
-        <button aria-label="Edit profile photo" class="absolute bottom-2 right-2 bg-blue-600 hover:bg-blue-700 text-white w-9 h-9 rounded-full flex items-center justify-center shadow-md transition-transform duration-300 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-blue-400" id="editPhotoBtn" type="button">
-          <i class="fas fa-camera"></i>
-        </button>
-        <h3 class="mt-4 text-xl font-semibold text-gray-900 truncate max-w-full" id="usernameDisplay">Loading...</h3>
-        <p class="text-sm text-gray-500 text-center break-words max-w-full" id="emailDisplay">Loading...</p>
+<body>
+  <div class="container">
+    <aside class="sidebar fade-in" aria-label="User profile sidebar">
+      <div class="profile-header">
+        <div class="profile-image-container">
+            <img alt="User profile picture" class="profile-image" height="120" id="profileImage" src="https://i.pinimg.com/236x/a2/80/e2/a280e2a50bf6240f29b49a72875adee5.jpg" width="120"/>
+            <button aria-label="Edit profile photo" class="edit-photo-button" id="editPhotoBtn" type="button">
+              <i class="fas fa-camera"></i>
+            </button>
+        </div>
+        <h3 class="username-display" id="usernameDisplay">Loading...</h3>
+        <p class="email-display" id="emailDisplay">Loading...!</p>
       </div>
-      <div class="mb-4 text-center">
+      <div class="file-upload-info">
         <input accept="image/jpeg,image/png,image/gif" class="hidden" id="photoUpload" type="file"/>
-        <p class="text-xs text-gray-400 select-none">Allowed JPG, GIF or PNG. Max size of 800K</p>
+        <p>Allowed JPG, GIF or PNG.</p>
       </div>
-      <hr class="border-gray-200 my-6"/>
-      <form autocomplete="off" class="space-y-4" id="profileForm" novalidate="">
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1" for="firstName">First Name</label>
-          <input class="w-full rounded-md border border-gray-300 px-4 py-2 text-sm focus:border-blue-600 focus:ring-1 focus:ring-blue-600 transition" id="firstName" name="firstName" placeholder="First name" required="" type="text"/>
+      <div class="divider"></div>
+      <form autocomplete="off" class="profile-form" id="profileForm" novalidate="">
+        <div class="form-group">
+          <label for="firstName">First Name</label>
+          <input id="firstName" name="firstName" placeholder="First name" required="" type="text"/>
         </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1" for="lastName">Last Name</label>
-          <input class="w-full rounded-md border border-gray-300 px-4 py-2 text-sm focus:border-blue-600 focus:ring-1 focus:ring-blue-600 transition" id="lastName" name="lastName" placeholder="Last name" type="text"/>
+        <div class="form-group">
+          <label for="lastName">Last Name</label>
+          <input id="lastName" name="lastName" placeholder="Last name" type="text"/>
         </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1" for="phoneNumber">Phone Number</label>
-          <input class="w-full rounded-md border border-gray-300 px-4 py-2 text-sm focus:border-blue-600 focus:ring-1 focus:ring-blue-600 transition" id="phoneNumber" name="phoneNumber" placeholder="Phone number" type="text"/>
+        <div class="form-group">
+          <label for="phoneNumber">Phone Number</label>
+          <input id="phoneNumber" name="phoneNumber" placeholder="Phone number" type="text"/>
         </div>
-        <hr class="border-gray-200 my-6"/>
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1" for="username">Username</label>
-          <input class="w-full rounded-md border border-gray-300 px-4 py-2 text-sm focus:border-blue-600 focus:ring-1 focus:ring-blue-600 transition" id="username" name="username" placeholder="Username" required="" type="text"/>
+        <div class="divider"></div>
+        <div class="form-group">
+          <label for="username">Username</label>
+          <input id="username" name="username" placeholder="Username" required="" type="text"/>
         </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1" for="email">Email</label>
-          <input class="w-full rounded-md border border-gray-300 px-4 py-2 text-sm focus:border-blue-600 focus:ring-1 focus:ring-blue-600 transition" id="email" name="email" placeholder="Email" required="" type="email"/>
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input id="email" name="email" placeholder="Email" required="" type="email"/>
         </div>
-        
-        <!-- OTP Verification Section (for email change) -->
-        <div id="emailChangeOtpSection" class="hidden bg-blue-50 rounded-lg p-4 border border-blue-200">
-          <h3 class="text-sm font-medium text-blue-800 mb-2">Email Change Verification</h3>
-          <p class="text-xs text-blue-600 mb-3">We've sent a verification OTP to your current email. Please enter it below to confirm your email change.</p>
+        <div id="emailChangeOtpSection" class="email-change-otp-section hidden">
+          <h3>Email Change Verification</h3>
+          <p>We've sent a verification OTP to your current email. Please enter it below to confirm your email change.</p>
           <div class="otp-input-group">
             <input type="text" maxlength="1" class="otp-input" data-index="0" autocomplete="one-time-code">
             <input type="text" maxlength="1" class="otp-input" data-index="1">
@@ -154,156 +666,142 @@
             <input type="text" maxlength="1" class="otp-input" data-index="5">
           </div>
           <input type="hidden" id="emailChangeOtpField">
-          <p class="text-xs text-red-600 mt-2 hidden" id="emailChangeOtpError"></p>
-          <div class="flex justify-between mt-4">
-            <button type="button" id="cancelEmailChange" class="text-xs text-blue-600 hover:text-blue-800 font-medium">Cancel</button>
-            <button type="button" id="resendEmailChangeOtp" class="text-xs text-blue-600 hover:text-blue-800 font-medium">Resend OTP</button>
+          <p class="otp-error hidden" id="emailChangeOtpError"></p>
+          <div class="otp-form-actions">
+            <button type="button" id="cancelEmailChange" class="button button-secondary">Cancel</button>
+            <button type="button" id="resendEmailChangeOtp" class="button button-secondary">Resend OTP</button>
           </div>
         </div>
-        
-        <div class="flex flex-col sm:flex-row gap-3 mt-6">
-          <button class="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md px-5 py-2 text-sm font-semibold transition shadow-md focus:outline-none focus:ring-2 focus:ring-blue-400 disabled:opacity-60 disabled:cursor-not-allowed" id="saveChanges" type="submit">
+        <div class="button-group">
+          <button class="button button-primary" id="saveChanges" type="submit">
             <i class="fas fa-save"></i>
             Save changes
           </button>
-          <button class="flex items-center justify-center gap-2 border border-gray-300 rounded-md px-5 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-100 transition focus:outline-none focus:ring-2 focus:ring-blue-400" id="cancelChanges" type="button">
+          <button class="button button-secondary" id="cancelChanges" type="button">
             <i class="fas fa-times"></i>
             Cancel
           </button>
         </div>
       </form>
     </aside>
-    
-    <!-- Main Content -->
-    <main class="fade-in">
-      <button aria-label="Back to Dashboard" class="inline-flex items-center gap-2 text-blue-600 font-medium mb-6 hover:text-blue-800 transition focus:outline-none focus:ring-2 focus:ring-blue-400 rounded" id="backToDashboard" type="button">
+    <main class="main-content fade-in">
+      <button aria-label="Back to Dashboard" class="back-button" id="backToDashboard" type="button">
         <i class="fas fa-arrow-left"></i>
         Back to Dashboard
       </button>
-
-      <nav aria-label="Profile sections" class="flex space-x-4 border-b border-gray-200 mb-6 overflow-x-auto no-scrollbar tab-buttons" role="tablist">
-        <button aria-controls="customTab" aria-selected="true" class="whitespace-nowrap py-3 px-5 text-sm font-semibold text-blue-600 border-b-2 border-blue-600 focus:outline-none" id="tabProfile" role="tab" type="button">
+      <nav aria-label="Profile sections" class="tab-navigation" role="tablist">
+        <button aria-controls="customTab" aria-selected="true" class="tab-button" id="tabProfile" role="tab" type="button">
           <i class="fas fa-user mr-1"></i>
           Profile
         </button>
-        <button aria-controls="securityTab" aria-selected="false" class="whitespace-nowrap py-3 px-5 text-sm font-semibold text-gray-500 hover:text-blue-600 border-b-2 border-transparent focus:outline-none" id="tabSecurity" role="tab" type="button">
+        <button aria-controls="securityTab" aria-selected="false" class="tab-button" id="tabSecurity" role="tab" type="button">
           <i class="fas fa-shield-alt mr-1"></i>
           Security
         </button>
-        <button aria-controls="apikeyTab" aria-selected="false" class="whitespace-nowrap py-3 px-5 text-sm font-semibold text-gray-500 hover:text-blue-600 border-b-2 border-transparent focus:outline-none" id="tabApiKey" role="tab" type="button">
+        <button aria-controls="apikeyTab" aria-selected="false" class="tab-button" id="tabApiKey" role="tab" type="button">
           <i class="fas fa-key mr-1"></i>
           API Key
         </button>
       </nav>
-      <div class="hidden p-4 mb-6 rounded text-sm font-medium" id="notification"></div>
-      
-      <!-- Profile Tab -->
-      <section aria-labelledby="tabProfile" class="bg-white rounded-lg shadow-md p-6" id="customTab" role="tabpanel">
-        <h1 class="text-2xl font-semibold mb-6 flex items-center gap-3 text-gray-900">
-          <i class="fas fa-id-card text-blue-600"></i>
+      <div class="notification hidden" id="notification"></div>
+      <section aria-labelledby="tabProfile" class="tab-content" id="customTab" role="tabpanel">
+        <h1 class="section-title">
+          <i class="fas fa-id-card"></i>
           Profile Information
         </h1>
-        <div aria-label="User statistics" class="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8 profile-stats">
-          <div class="bg-blue-50 rounded-lg p-5 text-center transition-transform duration-300 hover:-translate-y-1 hover:shadow-lg">
-            <p aria-live="polite" class="text-2xl font-extrabold text-blue-600 mb-1" id="balanceStat">Rp 0</p>
-            <p class="text-sm text-gray-500">Your Balance</p>
+        <div aria-label="User statistics" class="stats-grid">
+          <div class="stat-card">
+            <p aria-live="polite" class="stat-value" id="balanceStat">Rp 0</p>
+            <p class="stat-label">Your Balance</p>
           </div>
-          <div class="bg-blue-50 rounded-lg p-5 text-center transition-transform duration-300 hover:-translate-y-1 hover:shadow-lg">
-            <p aria-live="polite" class="text-2xl font-extrabold text-blue-600 mb-1" id="coinStat">0</p>
-            <p class="text-sm text-gray-500">Your Coins</p>
+          <div class="stat-card">
+            <p aria-live="polite" class="stat-value" id="coinStat">0</p>
+            <p class="stat-label">Your Coins</p>
           </div>
-          <div class="bg-blue-50 rounded-lg p-5 text-center transition-transform duration-300 hover:-translate-y-1 hover:shadow-lg">
-            <p aria-live="polite" class="text-2xl font-extrabold text-blue-600 mb-1" id="referralStat">-</p>
-            <p class="text-sm text-gray-500">Referral Code</p>
+          <div class="stat-card">
+            <p aria-live="polite" class="stat-value" id="referralStat">-</p>
+            <p class="stat-label">Referral Code</p>
           </div>
         </div>
-        <h2 class="text-lg font-semibold mb-4 text-gray-900">Account Details</h2>
+        <h2 class="security-section-title">Account Details</h2>
         <div class="overflow-x-auto">
-          <table class="w-full text-left border-collapse">
+          <table class="details-table">
             <tbody>
-              <tr class="border-b border-gray-200">
-                <th class="py-3 pr-6 font-medium text-gray-700 w-1/3">Username:</th>
-                <td class="py-3 text-gray-900" id="detailUsername">Loading...</td>
-              </tr>
-              <tr class="border-b border-gray-200">
-                <th class="py-3 pr-6 font-medium text-gray-700">Full name:</th>
-                <td class="py-3 text-gray-900" id="detailFullname">Loading...</td>
-              </tr>
-              <tr class="border-b border-gray-200">
-                <th class="py-3 pr-6 font-medium text-gray-700">Phone number:</th>
-                <td class="py-3 text-gray-900" id="detailPhone">Loading...</td>
-              </tr>
-              <tr class="border-b border-gray-200">
-                <th class="py-3 pr-6 font-medium text-gray-700">Email:</th>
-                <td class="py-3 text-gray-900" id="detailEmail">Loading...</td>
-              </tr>
-              <tr class="border-b border-gray-200">
-                <th class="py-3 pr-6 font-medium text-gray-700">Account Status:</th>
-                <td class="py-3" id="detailStatus"></td>
-              </tr>
-              <tr class="border-b border-gray-200">
-                <th class="py-3 pr-6 font-medium text-gray-700">Join Date:</th>
-                <td class="py-3 text-gray-900" id="detailJoinDate">Loading...</td>
+              <tr>
+                <th>Username:</th>
+                <td id="detailUsername">Loading...</td>
               </tr>
               <tr>
-                <th class="py-3 pr-6 font-medium text-gray-700">Last Login:</th>
-                <td class="py-3 text-gray-900" id="detailLastLogin">Loading...</td>
+                <th>Full name:</th>
+                <td id="detailFullname">Loading...</td>
+              </tr>
+              <tr>
+                <th>Phone number:</th>
+                <td id="detailPhone">Loading...</td>
+              </tr>
+              <tr>
+                <th>Email:</th>
+                <td id="detailEmail">Loading...</td>
+              </tr>
+              <tr>
+                <th>H2H Status:</th>
+                <td id="detailStatus"></td>
+              </tr>
+              <tr>
+                <th>Join Date:</th>
+                <td id="detailJoinDate">Loading...</td>
+              </tr>
+              <tr>
+                <th>Last Login:</th>
+                <td id="detailLastLogin">Loading...</td>
               </tr>
             </tbody>
           </table>
         </div>
       </section>
-      
-      <!-- Security Tab -->
-      <section aria-labelledby="tabSecurity" class="hidden bg-white rounded-lg shadow-md p-6" id="securityTab" role="tabpanel">
-        <h1 class="text-2xl font-semibold mb-6 flex items-center gap-3 text-gray-900">
-          <i class="fas fa-shield-alt text-blue-600"></i>
+      <section aria-labelledby="tabSecurity" class="tab-content hidden" id="securityTab" role="tabpanel">
+        <h1 class="section-title">
+          <i class="fas fa-shield-alt"></i>
           Security Settings
         </h1>
-        <div aria-live="assertive" class="hidden p-4 mb-6 rounded text-sm font-medium" id="passwordNotification" role="alert"></div>
-        
-        <h2 class="text-lg font-semibold mb-2 text-gray-900">Change Password</h2>
-        <p class="text-sm text-gray-500 mb-6">Ensure your account security with a strong password</p>
+        <div aria-live="assertive" class="notification hidden" id="passwordNotification" role="alert"></div>
+        <h2 class="security-section-title">Change Password</h2>
+        <p class="security-section-description">Ensure your account security with a strong password</p>
         <form autocomplete="off" id="passwordForm" novalidate="">
-          <div class="mb-4">
-            <label class="block text-sm font-medium text-gray-700 mb-1" for="currentPassword">Current Password</label>
-            <input autocomplete="current-password" class="w-full rounded-md border border-gray-300 px-4 py-2 text-sm focus:border-blue-600 focus:ring-1 focus:ring-blue-600 transition" id="currentPassword" name="currentPassword" placeholder="Enter current password" required="" type="password"/>
+          <div class="form-group">
+            <label for="currentPassword">Current Password</label>
+            <input autocomplete="current-password" id="currentPassword" name="currentPassword" placeholder="Enter current password" required="" type="password"/>
           </div>
-          <div class="mb-4">
-            <label class="block text-sm font-medium text-gray-700 mb-1" for="newPassword">New Password</label>
-            <input autocomplete="new-password" class="w-full rounded-md border border-gray-300 px-4 py-2 text-sm focus:border-blue-600 focus:ring-1 focus:ring-blue-600 transition" id="newPassword" name="newPassword" placeholder="Enter new password" required="" type="password"/>
+          <div class="form-group">
+            <label for="newPassword">New Password</label>
+            <input autocomplete="new-password" id="newPassword" name="newPassword" placeholder="Enter new password" required="" type="password"/>
           </div>
-          <div class="mb-4">
-            <label class="block text-sm font-medium text-gray-700 mb-1" for="confirmPassword">Confirm New Password</label>
-            <input autocomplete="new-password" class="w-full rounded-md border border-gray-300 px-4 py-2 text-sm focus:border-blue-600 focus:ring-1 focus:ring-blue-600 transition" id="confirmPassword" name="confirmPassword" placeholder="Confirm new password" required="" type="password"/>
+          <div class="form-group">
+            <label for="confirmPassword">Confirm New Password</label>
+            <input autocomplete="new-password" id="confirmPassword" name="confirmPassword" placeholder="Confirm new password" required="" type="password"/>
           </div>
-          <div aria-label="Password requirements" class="bg-gray-50 rounded-md p-4 text-xs text-gray-500 mb-6 leading-relaxed">
+          <div aria-label="Password requirements" class="password-requirements">
             <strong>Password Requirements:</strong>
-            <ul class="list-disc list-inside mt-2 space-y-1">
-              <li>Minimum 8 characters</li>
+            <ul>
+              <li>Minimum 6 characters</li>
               <li>At least one uppercase letter</li>
               <li>At least one number</li>
-              <li>At least one special character</li>
             </ul>
           </div>
-          <button class="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md px-5 py-2 text-sm font-semibold transition shadow-md focus:outline-none focus:ring-2 focus:ring-blue-400 disabled:opacity-60 disabled:cursor-not-allowed w-full sm:w-auto" id="changePasswordBtn" type="submit">
+          <button class="button button-primary" id="changePasswordBtn" type="submit">
             <i class="fas fa-key"></i>
             Change Password
           </button>
         </form>
-        
-        <hr class="border-gray-200 my-8"/>
-        
-        <h2 class="text-lg font-semibold mb-2 text-gray-900">Email Verification</h2>
-        <p aria-live="polite" class="text-sm text-gray-600 mb-4" id="emailVerificationStatus">Loading verification status...</p>
-        <button class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md px-5 py-2 text-sm font-semibold transition shadow-md focus:outline-none focus:ring-2 focus:ring-blue-400" id="verifyEmailBtn" style="display: none;" type="button">
+        <div class="divider"></div>
+        <h2 class="security-section-title">Email Verification</h2>
+        <p aria-live="polite" class="email-verification-status" id="emailVerificationStatus">Loading verification status...</p>
+        <button class="button button-primary" id="verifyEmailBtn" style="display: none;" type="button">
           <i class="fas fa-envelope"></i>
           Verify Email
         </button>
-        
-        <!-- Email Verification OTP Section -->
-        <form autocomplete="off" class="mt-4 space-y-4 hidden" id="otpInlineForm" novalidate="">
-          <p class="text-sm text-gray-600">We've sent a 6-digit verification code to your email. Please enter it below.</p>
+        <form autocomplete="off" class="otp-form hidden" id="otpInlineForm" novalidate="">
+          <p class="otp-form-description">We've sent a 6-digit verification code to your email. Please enter it below.</p>
           <div class="otp-input-group">
             <input type="text" maxlength="1" class="otp-input pulse" data-index="0" autocomplete="one-time-code">
             <input type="text" maxlength="1" class="otp-input" data-index="1">
@@ -313,14 +811,14 @@
             <input type="text" maxlength="1" class="otp-input" data-index="5">
           </div>
           <input type="hidden" id="otpInlineInput">
-          <p aria-live="assertive" class="text-xs text-red-600 hidden" id="otpInlineError" role="alert">Invalid OTP. Please enter a 6-digit numeric code.</p>
-          <div class="flex justify-between mt-4">
-            <button class="text-sm text-blue-600 hover:text-blue-800 font-medium" id="resendOtpBtn" type="button">Resend OTP</button>
-            <div class="flex gap-2">
-              <button class="px-4 py-2 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-400" id="otpInlineCancelBtn" type="button">
+          <p aria-live="assertive" class="otp-error hidden" id="otpInlineError" role="alert">Invalid OTP. Please enter a 6-digit numeric code.</p>
+          <div class="otp-form-actions">
+            <button class="button button-secondary" id="resendOtpBtn" type="button">Resend OTP</button>
+            <div class="button-group">
+              <button class="button button-secondary" id="otpInlineCancelBtn" type="button">
                 Cancel
               </button>
-              <button class="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md px-5 py-2 text-sm font-semibold transition shadow-md focus:outline-none focus:ring-2 focus:ring-blue-400 disabled:opacity-60 disabled:cursor-not-allowed" id="otpInlineSubmitBtn" type="submit">
+              <button class="button button-primary" id="otpInlineSubmitBtn" type="submit">
                 <i class="fas fa-check"></i>
                 Verify
               </button>
@@ -328,82 +826,79 @@
           </div>
         </form>
       </section>
-      
-      <!-- API Key Tab -->
-      <section aria-labelledby="tabApiKey" class="hidden bg-white rounded-lg shadow-md p-6" id="apikeyTab" role="tabpanel">
-        <h1 class="text-2xl font-semibold mb-6 flex items-center gap-3 text-gray-900">
-          <i class="fas fa-key text-blue-600"></i>
+      <section aria-labelledby="tabApiKey" class="tab-content hidden" id="apikeyTab" role="tabpanel">
+        <h1 class="section-title">
+          <i class="fas fa-key"></i>
           API Key Management
         </h1>
-        <p class="text-sm text-gray-600 mb-6">Secure access key for integrating with our services</p>
-        <hr class="border-gray-200 mb-6"/>
-        <h2 class="text-lg font-semibold mb-2 text-gray-900">Your Current API Key</h2>
-        <p class="text-sm text-gray-600 mb-4">Created on <span id="apiKeyDate">Loading...</span></p>
-        <div aria-label="API key value" aria-live="polite" class="relative bg-blue-50 rounded-md p-4 font-mono text-sm break-words border-l-4 border-blue-600 mb-6 select-all" id="apiKeyValue">
+        <p class="security-section-description">Secure access key for integrating with our services</p>
+        <div class="divider"></div>
+        <h2 class="security-section-title">Your Current API Key</h2>
+        <p class="security-section-description">Created on <span id="apiKeyDate">Loading...</span></p>
+        <div aria-label="API key value" aria-live="polite" class="api-key-value" id="apiKeyValue">
           Loading API key...
-          <button aria-label="Copy API key" class="absolute top-2 right-2 bg-blue-100 text-blue-600 rounded px-2 py-1 text-xs font-semibold hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-400" type="button">
+          <button aria-label="Copy API key" class="copy-button" type="button">
             <i class="far fa-copy"></i>
             Copy
           </button>
         </div>
-        <div class="flex items-center mb-6 space-x-2">
-          <input aria-checked="true" checked="" class="accent-blue-600" id="keyActive" type="checkbox"/>
-          <label class="text-gray-700 font-medium cursor-pointer" for="keyActive">Key Active</label>
+        <div class="checkbox-group">
+          <input aria-checked="true" checked="" type="checkbox" id="keyActive"/>
+          <label for="keyActive">Key Active</label>
         </div>
-        <div class="flex flex-col sm:flex-row gap-3 mb-6">
-          <button class="flex items-center justify-center gap-2 border border-gray-300 rounded-md px-5 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-100 transition focus:outline-none focus:ring-2 focus:ring-blue-400 w-full sm:w-auto" id="refreshKey" type="button">
+        <div class="button-group">
+          <button class="button button-secondary" id="refreshKey" type="button">
             <i class="fas fa-sync-alt"></i>
             Refresh
           </button>
-          <button class="flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 text-white rounded-md px-5 py-2 text-sm font-semibold transition shadow-md focus:outline-none focus:ring-2 focus:ring-red-400 w-full sm:w-auto" id="regenerateKey" type="button">
+          <button class="button button-danger" id="regenerateKey" type="button">
             <i class="fas fa-redo"></i>
             Regenerate Key
           </button>
         </div>
-        <div class="mb-4">
-          <input aria-checked="true" checked="" class="accent-blue-600" id="securityNotice" type="checkbox"/>
-          <label class="text-gray-700 font-semibold cursor-pointer" for="securityNotice">Security Notice</label>
+        <div class="divider"></div>
+        <div class="checkbox-group">
+          <input aria-checked="true" checked="" type="checkbox" id="securityNotice"/>
+          <label for="securityNotice">Security Notice</label>
         </div>
-        <p class="text-xs text-gray-500 leading-relaxed">
+        <p class="security-notice">
           <strong>Treat your API key like a password.</strong>
           Keep it secure and never expose it in client side code or public repositories. Regenerate your key immediately if you suspect it's been compromised.
         </p>
-        <hr class="border-gray-200 my-8"/>
-        <h2 class="text-lg font-semibold mb-4 text-gray-900">API Documentation</h2>
-        <p class="text-sm text-gray-600 mb-6">API documentation for integrating with our services</p>
-        <div aria-label="API documentation sections" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-          <article class="bg-blue-50 rounded-lg p-5 cursor-pointer transition-transform duration-300 hover:-translate-y-1 hover:bg-blue-600 hover:text-white focus:outline-none focus:ring-2 focus:ring-blue-400" tabindex="0">
-            <i class="fas fa-server text-2xl mb-3"></i>
-            <h3 class="text-lg font-semibold mb-1">Services</h3>
-            <p class="text-sm">Manage your services</p>
+        <div class="divider"></div>
+        <h2 class="security-section-title">API Documentation</h2>
+        <p class="security-section-description">API documentation for integrating with our services</p>
+        <div aria-label="API documentation sections" class="api-docs-grid">
+          <article class="api-doc-card" tabindex="0">
+            <i class="fas fa-server"></i>
+            <h3>Services</h3>
+            <p>Manage your services</p>
           </article>
-          <article class="bg-blue-50 rounded-lg p-5 cursor-pointer transition-transform duration-300 hover:-translate-y-1 hover:bg-blue-600 hover:text-white focus:outline-none focus:ring-2 focus:ring-blue-400" tabindex="0">
-            <i class="fas fa-globe text-2xl mb-3"></i>
-            <h3 class="text-lg font-semibold mb-1">Countries</h3>
-            <p class="text-sm">Available countries</p>
+          <article class="api-doc-card" tabindex="0">
+            <i class="fas fa-globe"></i>
+            <h3>Countries</h3>
+            <p>Available countries</p>
           </article>
-          <article class="bg-blue-50 rounded-lg p-5 cursor-pointer transition-transform duration-300 hover:-translate-y-1 hover:bg-blue-600 hover:text-white focus:outline-none focus:ring-2 focus:ring-blue-400" tabindex="0">
-            <i class="fas fa-phone text-2xl mb-3"></i>
-            <h3 class="text-lg font-semibold mb-1">Numbers</h3>
-            <p class="text-sm">Phone numbers</p>
+          <article class="api-doc-card" tabindex="0">
+            <i class="fas fa-phone"></i>
+            <h3>Numbers</h3>
+            <p>Phone numbers</p>
           </article>
-          <article class="bg-blue-50 rounded-lg p-5 cursor-pointer transition-transform duration-300 hover:-translate-y-1 hover:bg-blue-600 hover:text-white focus:outline-none focus:ring-2 focus:ring-blue-400" tabindex="0">
-            <i class="fas fa-shopping-cart text-2xl mb-3"></i>
-            <h3 class="text-lg font-semibold mb-1">Orders</h3>
-            <p class="text-sm">Order management</p>
+          <article class="api-doc-card" tabindex="0">
+            <i class="fas fa-shopping-cart"></i>
+            <h3>Orders</h3>
+            <p>Order management</p>
           </article>
-          <article class="bg-blue-50 rounded-lg p-5 cursor-pointer transition-transform duration-300 hover:-translate-y-1 hover:bg-blue-600 hover:text-white focus:outline-none focus:ring-2 focus:ring-blue-400" tabindex="0">
-            <i class="fas fa-info-circle text-2xl mb-3"></i>
-            <h3 class="text-lg font-semibold mb-1">Order Status</h3>
-            <p class="text-sm">Check order status</p>
+          <article class="api-doc-card" tabindex="0">
+            <i class="fas fa-info-circle"></i>
+            <h3>Order Status</h3>
+            <p>Check order status</p>
           </article>
         </div>
       </section>
     </main>
   </div>
-  
   <script>
-    // Elements 
     const tabs = {
       profile: document.getElementById("customTab"),
       security: document.getElementById("securityTab"),
@@ -436,29 +931,21 @@
     const otpInlineSubmitBtn = document.getElementById("otpInlineSubmitBtn");
     const resendOtpBtn = document.getElementById("resendOtpBtn");
     const backToDashboardBtn = document.getElementById("backToDashboard");
-    
-    // Email Change OTP Elements
     const emailChangeOtpSection = document.getElementById("emailChangeOtpSection");
     const emailChangeOtpInputs = document.querySelectorAll('#emailChangeOtpSection .otp-input');
     const emailChangeOtpField = document.getElementById("emailChangeOtpField");
     const emailChangeOtpError = document.getElementById("emailChangeOtpError");
     const cancelEmailChangeBtn = document.getElementById("cancelEmailChange");
     const resendEmailChangeOtpBtn = document.getElementById("resendEmailChangeOtp");
-
-    // Form fields
     const profileForm = document.getElementById("profileForm");
     const firstNameInput = document.getElementById("firstName");
     const lastNameInput = document.getElementById("lastName");
     const phoneNumberInput = document.getElementById("phoneNumber");
     const usernameInput = document.getElementById("username");
     const emailInput = document.getElementById("email");
-
-    // Security form fields
     const currentPasswordInput = document.getElementById("currentPassword");
     const newPasswordInput = document.getElementById("newPassword");
     const confirmPasswordInput = document.getElementById("confirmPassword");
-
-    // Detail fields
     const detailUsername = document.getElementById("detailUsername");
     const detailFullname = document.getElementById("detailFullname");
     const detailPhone = document.getElementById("detailPhone");
@@ -469,64 +956,49 @@
     const balanceStat = document.getElementById("balanceStat");
     const coinStat = document.getElementById("coinStat");
     const referralStat = document.getElementById("referralStat");
-
-    // State
     let currentUserData = null;
-    let emailChangeRequest = null; // To track if there's an ongoing email change request
-
-    // Utility functions
+    let emailChangeRequest = null;
     function showNotification(message, type = "info", element = notification) {
-    element.className = "p-4 mb-6 rounded text-sm font-medium";
+    element.className = "notification";
     element.textContent = message;
-    
     if (type === "success") {
-        element.classList.add("bg-green-100", "text-green-800", "border-l-4", "border-green-600");
+        element.classList.add("success");
     } else if (type === "error") {
-        element.classList.add("bg-red-100", "text-red-800", "border-l-4", "border-red-600");
+        element.classList.add("error");
     } else {
-        element.classList.add("bg-blue-100", "text-blue-800", "border-l-4", "border-blue-600");
+        element.classList.add("info");
     }
-    
     element.classList.remove("hidden");
     setTimeout(() => {
         element.classList.add("hidden");
         element.textContent = "";
     }, 5000);
 }
-
     function setLoading(button, isLoading) {
       if (isLoading) {
         button.disabled = true;
-        button.innerHTML = `<svg class="animate-spin h-5 w-5 mr-2 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+        const spinner = `<svg class="spinner" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" style="width: 1.25rem; height: 1.25rem; margin-right: 0.5rem; color: currentColor;">
           <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
           <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
-        </svg> ${button.textContent.trim()}`;
+        </svg>`;
+        const originalText = button.getAttribute('data-original-text') || button.innerHTML;
+        button.setAttribute('data-original-text', originalText);
+        button.innerHTML = spinner + originalText.replace(/<i.*?<\/i>/, '').trim();
       } else {
         button.disabled = false;
-        // Restore original icon and text
-        if (button.id === "saveChanges") {
-          button.innerHTML = `<i class="fas fa-save"></i> Save changes`;
-        } else if (button.id === "changePasswordBtn") {
-          button.innerHTML = `<i class="fas fa-key"></i> Change Password`;
-        } else if (button.id === "regenerateKey") {
-          button.innerHTML = `<i class="fas fa-redo"></i> Regenerate Key`;
-        } else if (button.id === "verifyEmailBtn") {
-          button.innerHTML = `<i class="fas fa-envelope"></i> Verify Email`;
-        } else if (button.id === "otpInlineSubmitBtn") {
-          button.innerHTML = `<i class="fas fa-check"></i> Verify`;
-        } else {
-          button.textContent = button.textContent.trim();
+        const originalText = button.getAttribute('data-original-text');
+        if (originalText) {
+            button.innerHTML = originalText;
+            button.removeAttribute('data-original-text');
         }
       }
     }
-
     function formatCurrency(amount) {
       return new Intl.NumberFormat("id-ID", {
         style: "currency",
         currency: "IDR",
       }).format(amount);
     }
-
     function formatDate(dateString) {
       if (!dateString) return "N/A";
       const date = new Date(dateString);
@@ -538,30 +1010,22 @@
         minute: "2-digit",
       });
     }
-
-    // OTP Input Handling for multiple OTP sections
     function setupOtpInputs(inputs, hiddenField, errorField) {
       inputs.forEach((input, index) => {
-        // Handle input
         input.addEventListener('input', (e) => {
           if (input.value.length === 1) {
             if (index < inputs.length - 1) {
               inputs[index + 1].focus();
             }
           }
-          
-          // Update the hidden field value
           let otpValue = '';
           inputs.forEach(i => otpValue += i.value);
           hiddenField.value = otpValue;
-          
           if (errorField) {
             errorField.textContent = '';
             errorField.classList.add('hidden');
           }
         });
-        
-        // Handle backspace
         input.addEventListener('keydown', (e) => {
           if (e.key === 'Backspace' && input.value.length === 0) {
             if (index > 0) {
@@ -569,8 +1033,6 @@
             }
           }
         });
-        
-        // Handle paste
         input.addEventListener('paste', (e) => {
           e.preventDefault();
           const pastedData = (e.clipboardData || window.clipboardData).getData('text/plain');
@@ -581,19 +1043,13 @@
               }
             }
             if (inputs[5]) inputs[5].focus();
-            
-            // Update the hidden field value
             hiddenField.value = pastedData;
           }
         });
       });
     }
-    
-    // Initialize OTP inputs
     setupOtpInputs(otpInputs, otpInlineInput, otpInlineError);
     setupOtpInputs(emailChangeOtpInputs, emailChangeOtpField, emailChangeOtpError);
-
-    // Tab switching
     function switchTab(tabKey) {
       Object.entries(tabs).forEach(([key, el]) => {
         if (key === tabKey) {
@@ -611,22 +1067,13 @@
         }
       });
     }
-
     tabButtons.profile.addEventListener("click", () => switchTab("profile"));
     tabButtons.security.addEventListener("click", () => switchTab("security"));
     tabButtons.apikey.addEventListener("click", () => switchTab("apikey"));
-
-    // Profile photo upload
     editPhotoBtn.addEventListener("click", () => photoUpload.click());
-
     photoUpload.addEventListener("change", async (e) => {
       const file = e.target.files[0];
       if (!file) return;
-
-      if (file.size > 800 * 1024) {
-        showNotification("File size exceeds 800KB limit", "error");
-        return;
-      }
 
       if (!["image/jpeg", "image/png", "image/gif"].includes(file.type)) {
         showNotification("Only JPG, PNG, or GIF files are allowed", "error");
@@ -640,6 +1087,9 @@
       reader.readAsDataURL(file);
 
       try {
+        // Show loading state on the profile image or a separate indicator
+        profileImage.style.opacity = '0.5'; // Example visual feedback
+
         const formData = new FormData();
         formData.append("photo", file);
 
@@ -653,43 +1103,43 @@
 
         if (data.success) {
           showNotification("Profile photo updated successfully", "success");
+          // Update the image source with the URL from the server response
           profileImage.src = data.profileUrl;
-          currentUserData.profileUrl = data.profileUrl;
+          currentUserData.profileUrl = data.profileUrl; // Update local user data
         } else {
           showNotification(data.message || "Failed to update profile photo", "error");
+          // Revert image source if update failed (optional)
+          profileImage.src = currentUserData.profileUrl || "https://placehold.co/120x120/png?text=Profile+Picture";
         }
       } catch (error) {
         console.error("Error:", error);
         showNotification("Failed to update profile photo", "error");
+        // Revert image source on network error (optional)
+        profileImage.src = currentUserData.profileUrl || "https://placehold.co/120x120/png?text=Profile+Picture";
+      } finally {
+        // Remove loading state
+        profileImage.style.opacity = '1';
       }
     });
 
-    // Populate form and details with user data
     function populateFormWithUserData(user) {
-    // Mempersiapkan gambar dan nama pengguna
     profileImage.src = user.profileUrl || "https://placehold.co/120x120/png?text=Profile+Picture";
     document.getElementById("usernameDisplay").textContent = user.username || "N/A";
     document.getElementById("emailDisplay").textContent = user.email || "N/A";
-
-    // Mengisi kolom input
     firstNameInput.value = user.fullname ? user.fullname.split(" ")[0] : "";
     lastNameInput.value = user.fullname ? user.fullname.split(" ").slice(1).join(" ") : "";
     phoneNumberInput.value = user.nomor || "";
     usernameInput.value = user.username || "";
     emailInput.value = user.email || "";
-
-    // Mengisi detail pengguna
     detailUsername.textContent = user.username || "N/A";
     detailFullname.textContent = user.fullname || "N/A";
     detailPhone.textContent = user.nomor || "N/A";
     detailEmail.textContent = user.email || "N/A";
     detailStatus.innerHTML = user.isVerified
-        ? '<span class="inline-block bg-green-100 text-green-800 text-xs font-semibold px-2 py-1 rounded">Verified</span>'
-        : '<span class="inline-block bg-red-100 text-red-800 text-xs font-semibold px-2 py-1 rounded">Not Verified</span>';
+        ? '<span class="status-badge verified">Verified</span>'
+        : '<span class="status-badge not-verified">Not Verified</span>';
     detailJoinDate.textContent = formatDate(user.tanggalDaftar);
     detailLastLogin.textContent = formatDate(user.lastLogin);
-
-    // Update email verification status text and button visibility
     if (user.isVerified) {
       emailVerificationStatus.textContent = "Your email is verified.";
       verifyEmailBtn.style.display = "none";
@@ -697,16 +1147,13 @@
       emailVerificationStatus.textContent = "Your email is not verified.";
       verifyEmailBtn.style.display = "inline-flex";
     }
-
-    // Menampilkan API key jika ada
     const apiKeyValue = document.getElementById("apiKeyValue");
     const apiKeyDate = document.getElementById("apiKeyDate");
-    
     if (user.apiKey) {
         apiKeyValue.innerHTML = `
             ${user.apiKey}
             <button
-                class="absolute top-2 right-2 bg-blue-100 text-blue-600 rounded px-2 py-1 text-xs font-semibold hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                class="copy-button"
                 type="button"
                 aria-label="Copy API key"
             >
@@ -718,23 +1165,18 @@
         apiKeyValue.textContent = "No API key available.";
         apiKeyDate.textContent = "N/A";
     }
-
-    // Reset email change OTP section
     emailChangeOtpSection.classList.add("hidden");
     emailChangeRequest = null;
 }
-
-    // Load user data
     async function loadUserData() {
     try {
         const response = await fetch("/profile/users", {
             credentials: "include",
         });
         const data = await response.json();
-
         if (data.success) {
             currentUserData = data.user;
-            populateFormWithUserData(data.user);  // Pastikan menampilkan data dengan benar
+            populateFormWithUserData(data.user);
         } else {
             showNotification(data.message || "Failed to load user data", "error");
         }
@@ -743,44 +1185,33 @@
         showNotification("Failed to load user data", "error");
     }
 }
-
-    // Save profile changes
     profileForm.addEventListener("submit", async (e) => {
       e.preventDefault();
-
       const firstName = firstNameInput.value.trim();
       const lastName = lastNameInput.value.trim();
       const phoneNumber = phoneNumberInput.value.trim();
       const username = usernameInput.value.trim();
       const email = emailInput.value.trim();
-
       if (!firstName || !username || !email) {
         showNotification("First name, username and email are required", "error");
         return;
       }
-      
-      // Check if we're in email change verification mode
       if (emailChangeRequest && emailChangeRequest.newEmail === email) {
-        // User is submitting OTP for email change
         try {
           setLoading(saveChangesBtn, true);
-          
           const otp = emailChangeOtpField.value;
           if (!otp || otp.length !== 6) {
             emailChangeOtpError.textContent = "Please enter a valid 6-digit OTP";
             emailChangeOtpError.classList.remove("hidden");
             return;
           }
-
           const response = await fetch("/profile/confirm-email-change", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ otp }),
             credentials: "include",
           });
-
           const data = await response.json();
-          
           if (data.success) {
             showNotification("Email updated successfully", "success");
             emailChangeOtpSection.classList.add("hidden");
@@ -798,11 +1229,8 @@
         }
         return;
       }
-
-      // Normal profile update flow
       try {
         setLoading(saveChangesBtn, true);
-
         const newFullname = `${firstName}${lastName ? " " + lastName : ""}`;
         if (newFullname !== currentUserData.fullname) {
           const fullnameRes = await fetch("/profile/change-fullname", {
@@ -816,7 +1244,6 @@
             throw new Error(fullnameData.message || "Failed to update fullname");
           }
         }
-
         if (phoneNumber && phoneNumber !== currentUserData.nomor) {
           const phoneRes = await fetch("/profile/change-nomor", {
             method: "POST",
@@ -829,7 +1256,6 @@
             throw new Error(phoneData.message || "Failed to update phone number");
           }
         }
-
         if (username !== currentUserData.username) {
           const usernameRes = await fetch("/profile/change-username", {
             method: "POST",
@@ -842,9 +1268,7 @@
             throw new Error(usernameData.message || "Failed to update username");
           }
         }
-
         if (email !== currentUserData.email) {
-          // Request email change (will trigger OTP)
           const emailRes = await fetch("/profile/request-email-change", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -852,12 +1276,9 @@
             credentials: "include",
           });
           const emailData = await emailRes.json();
-          
           if (emailData.success) {
             showNotification("OTP sent to your current email", "success");
             emailChangeRequest = { newEmail: email };
-            
-            // Show OTP section
             emailChangeOtpSection.classList.remove("hidden");
             for (const input of emailChangeOtpInputs) input.value = '';
             emailChangeOtpField.value = '';
@@ -866,7 +1287,6 @@
             throw new Error(emailData.message || "Failed to request email change");
           }
         } else {
-          // No email change, just update other fields
           await loadUserData();
           showNotification("Profile updated successfully", "success");
         }
@@ -877,31 +1297,23 @@
         setLoading(saveChangesBtn, false);
       }
     });
-    
-    // Cancel email change
     cancelEmailChangeBtn.addEventListener("click", () => {
       emailChangeOtpSection.classList.add("hidden");
       emailChangeRequest = null;
       emailInput.value = currentUserData.email;
       showNotification("Email change canceled", "info");
     });
-    
-    // Resend email change OTP
     resendEmailChangeOtpBtn.addEventListener("click", async () => {
       if (!emailChangeRequest) return;
-      
       try {
         setLoading(resendEmailChangeOtpBtn, true);
-        
         const response = await fetch("/profile/request-email-change", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ newEmail: emailChangeRequest.newEmail }),
           credentials: "include",
         });
-        
         const data = await response.json();
-        
         if (data.success) {
           showNotification("New OTP sent to your current email", "success");
           for (const input of emailChangeOtpInputs) input.value = '';
@@ -917,8 +1329,6 @@
         setLoading(resendEmailChangeOtpBtn, false);
       }
     });
-
-    // Cancel changes
     cancelChangesBtn.addEventListener("click", () => {
       if (currentUserData) {
         populateFormWithUserData(currentUserData);
@@ -927,40 +1337,31 @@
       }
       showNotification("Changes discarded", "success");
     });
-
-    // Change password
     document.getElementById("passwordForm").addEventListener("submit", async (e) => {
       e.preventDefault();
-
       const currentPassword = currentPasswordInput.value;
       const newPassword = newPasswordInput.value;
       const confirmPassword = confirmPasswordInput.value;
-
       if (!currentPassword || !newPassword || !confirmPassword) {
         showNotification("All fields are required", "error", passwordNotification);
         return;
       }
-
       if (newPassword !== confirmPassword) {
         showNotification("New passwords do not match", "error", passwordNotification);
         return;
       }
-
-      if (newPassword.length < 8) {
-        showNotification("Password must be at least 8 characters", "error", passwordNotification);
+      if (newPassword.length < 6) {
+        showNotification("Password must be at least 6 characters", "error", passwordNotification);
         return;
       }
-
       if (!/[A-Z]/.test(newPassword) || !/[0-9]/.test(newPassword)) {
         showNotification(
           "Password must contain at least one uppercase letter and one number",
           "error", passwordNotification);
         return;
       }
-
       try {
         setLoading(changePasswordBtn, true);
-
         const response = await fetch("/profile/change-password", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -970,9 +1371,7 @@
           }),
           credentials: "include",
         });
-
         const data = await response.json();
-
         if (data.success) {
           showNotification("Password changed successfully", "success", passwordNotification);
           currentPasswordInput.value = "";
@@ -988,8 +1387,6 @@
         setLoading(changePasswordBtn, false);
       }
     });
-
-    // API Key regenerate
     regenerateKeyBtn.addEventListener("click", async () => {
       if (
         !confirm(
@@ -998,21 +1395,18 @@
       ) {
         return;
       }
-
       try {
         setLoading(regenerateKeyBtn, true);
-
         const response = await fetch("/profile/regenerate-apikey", {
           method: "POST",
           credentials: "include",
         });
-
         const data = await response.json();
         if (data.success) {
           apiKeyValue.innerHTML = `
             ${data.newApiKey}
             <button
-              class="absolute top-2 right-2 bg-blue-100 text-blue-600 rounded px-2 py-1 text-xs font-semibold hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-400"
+              class="copy-button"
               type="button"
               aria-label="Copy API key"
             >
@@ -1031,17 +1425,13 @@
         setLoading(regenerateKeyBtn, false);
       }
     });
-
-    // API Key refresh
     refreshKeyBtn.addEventListener("click", async () => {
       await loadUserData();
       showNotification("API Key information refreshed", "success");
     });
-
-    // Copy API Key
     apiKeyValue.addEventListener("click", (e) => {
       if (e.target.closest("button")) {
-        const apiKeyText = apiKeyValue.textContent.trim();
+        const apiKeyText = apiKeyValue.textContent.split(' Copy')[0].trim();
         navigator.clipboard
           .writeText(apiKeyText)
           .then(() => {
@@ -1053,8 +1443,6 @@
           });
       }
     });
-
-    // Verify Email button click - show inline OTP form and send OTP
     verifyEmailBtn.addEventListener("click", async () => {
       try {
         setLoading(verifyEmailBtn, true);
@@ -1066,15 +1454,10 @@
         if (data.success) {
           showNotification("OTP sent to your email", "success");
           otpInlineForm.classList.remove("hidden");
-          
-          // Reset OTP fields
           otpInlineInput.value = "";
           for (const input of otpInputs) input.value = '';
           otpInputs[0].focus();
-          
           otpInlineError.classList.add("hidden");
-          
-          // Add pulse animation to first input
           otpInputs[0].classList.add('pulse');
           setTimeout(() => otpInputs[0].classList.remove('pulse'), 1500);
         } else {
@@ -1087,8 +1470,6 @@
         setLoading(verifyEmailBtn, false);
       }
     });
-    
-    // Resend OTP button
     resendOtpBtn.addEventListener("click", async () => {
       try {
         setLoading(resendOtpBtn, true);
@@ -1113,27 +1494,21 @@
         setLoading(resendOtpBtn, false);
       }
     });
-
-    // OTP inline form cancel button
     otpInlineCancelBtn.addEventListener("click", () => {
       otpInlineForm.classList.add("hidden");
       otpInlineInput.value = "";
       for (const input of otpInputs) input.value = '';
       otpInlineError.classList.add("hidden");
     });
-
-    // OTP inline form submit
     otpInlineForm.addEventListener("submit", async (e) => {
       e.preventDefault();
       const otp = otpInlineInput.value.trim();
-
       if (!/^\d{6}$/.test(otp)) {
         otpInlineError.classList.remove("hidden");
         otpInputs[0].focus();
         return;
       }
       otpInlineError.classList.add("hidden");
-
       try {
         setLoading(otpInlineSubmitBtn, true);
         const response = await fetch("/profile/verify-email", {
@@ -1143,7 +1518,6 @@
           credentials: "include",
         });
         const data = await response.json();
-
         if (data.success) {
           showNotification("Email successfully verified", "success");
           otpInlineForm.classList.add("hidden");
@@ -1155,8 +1529,6 @@
           otpInlineError.textContent = data.message || "Invalid OTP";
           otpInlineError.classList.remove("hidden");
           otpInputs[0].focus();
-          
-          // Add red border to all OTP inputs
           for (const input of otpInputs) {
             input.classList.add('border-red-500');
             setTimeout(() => input.classList.remove('border-red-500'), 1500);
@@ -1169,13 +1541,9 @@
         setLoading(otpInlineSubmitBtn, false);
       }
     });
-
-    // Back to dashboard button
     backToDashboardBtn.addEventListener("click", () => {
       window.location.href = "/dashboard";
     });
-
-    // Initialize
     document.addEventListener("DOMContentLoaded", () => {
       loadUserData();
       switchTab("profile");
