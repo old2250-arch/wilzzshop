@@ -19,8 +19,8 @@ const BASE_URL = "https://atlantich2h.com";
 const API_KEY = process.env.SEKALIPAY_KEY;
 const BASE_URL2 = "https://sekalipay.com/api/v1";
 
-const domain = process.env.PTERO_DOMAIN;
-const apikey = process.env.PTERO_API_KEY;
+const domain = "https://im-rerezz.my.id";
+const apikey = "ptla_zfAVRwBDAgnlgDUiAuvQdTKRCNzIuJNCdGB2YdME77P";
 
 mongoose.connect(process.env.MONGODB_URI || "mongodb://localhost:27017/appdb");
 const db = mongoose.connection;
