@@ -2001,8 +2001,9 @@ app.get("/h2h/products", validateApiKey, async (req, res) => {
         provider: i.provider,
         brand_status: i.brand_status,
         status: i.status,
-        img_url: customImageUrl,
+        img_url: i.img_url,
         final_price: finalPrice,
+        price: finalPrice,
         price_formatted: `Rp ${toRupiah(finalPrice)}`,
         status_emoji: i.status === "available" ? "✅" : "❎",
       };
