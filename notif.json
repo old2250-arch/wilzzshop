@@ -7,15 +7,15 @@
       "judul": "Maintenance Server",
       "pesan": "Akan ada maintenance pada jam 2 pagi.",
       "tipe": "info",
-      "url": "https://maintenance",
+      "url": "#",
       "created_at": "2025-06-24T19:00:00Z"
     },
     {
       "id": 2,
-      "judul": "Promo Topup",
-      "pesan": "Bonus saldo 10% untuk topup hari ini!",
-      "tipe": "promo",
-      "url": "https://promo",
+      "judul": "Riset Transaksi Global",
+      "pesan": "Riset Transaksi Global Penyesuaian Database",
+      "tipe": "info",
+      "url": "/",
       "created_at": "2025-06-24T08:00:00Z"
     }
   ]
