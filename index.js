@@ -1185,85 +1185,6 @@ async function getServerPublicIp() {
     return null;
   }
 }
-
-function validateApiKey(req, res, next) {
-  const apiKey = req.headers['x-apikey'] || req.query.apikey;
-  if (!apiKey) {
-    return res.status(400).json({
-      success: false,
-      message: 'API Key harus disertakan di header "X-APIKEY" atau query param "apikey"',
-    });
-  }
-  User.findOne({ apiKey })
-    .then(async (user) => {
-      if (!user) {
-        return res.status(401).json({
-          success: false,
-          message: "Invalid API Key",
-        });
-      }
-      const requestIp =
-        req.headers['x-forwarded-for']?.split(',').shift().trim() || 
-        req.ip ||
-        req.connection.remoteAddress; 
-      const detectedIp = ['::1', '127.0.0.1'].includes(requestIp)
-        ? await getServerPublicIp()
-        : requestIp;
-      const whitelistIpArray = Array.isArray(user.whitelistIp)
-        ? user.whitelistIp
-        : user.whitelistIp.split(',').map(ip => ip.trim());
-      if (whitelistIpArray.length > 0 && !whitelistIpArray.includes('0.0.0.0')) {
-        if (!detectedIp || !whitelistIpArray.includes(detectedIp)) {
-          console.warn(`Unauthorized API access from IP ${detectedIp} for user ${user.username}. IP not in whitelist: [${whitelistIpArray.join(', ')}]`);
-          return res.status(403).json({
-            success: false,
-            message: "IP Anda saat ini tidak diizinkan untuk menggunakan API Key ini.",
-            your_ip: detectedIp
-          });
-        }
-      }
-      if (user.isLocked) {
-        return res.status(429).json({
-          success: false,
-          message: "Anda harus menunggu 5 detik sebelum melakukan request lagi.",
-        });
-      }
-      user.isLocked = true;
-      await user.save();
-      setTimeout(async () => {
-        try {
-          if (!user.isVerified) {
-            return res.status(403).json({
-              success: false,
-              message: "Akun belum terverifikasi. Silakan verifikasi akun terlebih dahulu.",
-            });
-          }
-          req.user = user;
-          next();
-        } catch (error) {
-          console.error("Error during API Key validation timeout:", error);
-          return res.status(500).json({
-            success: false,
-            message: "Internal server error during validation",
-          });
-        } finally {
-          user.isLocked = false;
-          try {
-            await user.save();
-          } catch (saveError) {
-            console.error("Error saving user after unlocking in validateApiKey:", saveError);
-          }
-        }
-      }, 5000);
-    })
-    .catch((error) => {
-      console.error("Error validating API Key (DB query):", error);
-      return res.status(500).json({
-        success: false,
-        message: "Internal server error",
-      });
-    });
-}
 /*
 function validateApiKey(req, res, next) {
   const apiKey = req.headers['x-apikey'] || req.query.apikey;
@@ -1344,6 +1265,84 @@ function validateApiKey(req, res, next) {
     });
 }
 */
+function validateApiKey(req, res, next) {
+  const apiKey = req.headers['x-apikey'] || req.query.apikey;
+  if (!apiKey) {
+    return res.status(400).json({
+      success: false,
+      message: 'API Key harus disertakan di header "X-APIKEY" atau query param "apikey"',
+    });
+  }
+  User.findOne({ apiKey })
+    .then(async (user) => {
+      if (!user) {
+        return res.status(401).json({
+          success: false,
+          message: "Invalid API Key",
+        });
+      }
+      const requestIp =
+        req.headers['x-forwarded-for']?.split(',').shift().trim() || 
+        req.ip ||
+        req.connection.remoteAddress; 
+      const detectedIp = ['::1', '127.0.0.1'].includes(requestIp)
+        ? await getServerPublicIp()
+        : requestIp;
+      const whitelistIpArray = Array.isArray(user.whitelistIp)
+        ? user.whitelistIp
+        : user.whitelistIp.split(',').map(ip => ip.trim());
+      if (whitelistIpArray.length > 0 && !whitelistIpArray.includes('0.0.0.0')) {
+        if (!detectedIp || !whitelistIpArray.includes(detectedIp)) {
+          console.warn(`Unauthorized API access from IP ${detectedIp} for user ${user.username}. IP not in whitelist: [${whitelistIpArray.join(', ')}]`);
+          return res.status(403).json({
+            success: false,
+            message: "IP Anda saat ini tidak diizinkan untuk menggunakan API Key ini.",
+            your_ip: detectedIp
+          });
+        }
+      }
+      if (user.isLocked) {
+        return res.status(429).json({
+          success: false,
+          message: "Anda harus menunggu 5 detik sebelum melakukan request lagi.",
+        });
+      }
+      user.isLocked = true;
+      await user.save();
+      setTimeout(async () => {
+        try {
+          if (!user.isVerified) {
+            return res.status(403).json({
+              success: false,
+              message: "Akun belum terverifikasi. Silakan verifikasi akun terlebih dahulu.",
+            });
+          }
+          req.user = user;
+          next();
+        } catch (error) {
+          console.error("Error during API Key validation timeout:", error);
+          return res.status(500).json({
+            success: false,
+            message: "Internal server error during validation",
+          });
+        } finally {
+          user.isLocked = false;
+          try {
+            await user.save();
+          } catch (saveError) {
+            console.error("Error saving user after unlocking in validateApiKey:", saveError);
+          }
+        }
+      }, 1000);
+    })
+    .catch((error) => {
+      console.error("Error validating API Key (DB query):", error);
+      return res.status(500).json({
+        success: false,
+        message: "Internal server error",
+      });
+    });
+}
 module.exports = { 
   validateApiKey, 
   User,   
