@@ -1474,6 +1474,141 @@ app.post("/admin/unblock-user", requireAdmin, async (req, res) => {
   }
 });
 
+app.post("/admin/update-deposit-status", requireAdmin, async (req, res) => {
+  const { userId, depositId, newStatus } = req.body;
+
+  if (!userId || !depositId || !newStatus) {
+    return res.status(400).json({
+      success: false,
+      message: "Parameter userId, depositId, dan newStatus wajib diisi.",
+    });
+  }
+
+  try {
+    const result = await editHistoryDeposit(userId, depositId, newStatus);
+    
+    if (!result) {
+        return res.status(404).json({ success: false, message: "User atau transaksi deposit tidak ditemukan." });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: `Status deposit dengan ID ${depositId} berhasil diubah menjadi ${newStatus}.`,
+    });
+
+  } catch (error) {
+    console.error("❌ Error saat update status deposit oleh admin:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Terjadi kesalahan pada server.",
+      error: error.message,
+    });
+  }
+});
+
+app.post("/admin/update-order-status", requireAdmin, async (req, res) => {
+  const { userId, orderId, newStatus, newSn } = req.body;
+
+  if (!userId || !orderId || !newStatus) {
+    return res.status(400).json({
+      success: false,
+      message: "Parameter userId, orderId, dan newStatus wajib diisi.",
+    });
+  }
+
+  try {
+    const user = await User.findOne({ _id: userId, "historyOrder.id": orderId });
+    if (!user) {
+        return res.status(404).json({ success: false, message: "User atau transaksi order tidak ditemukan." });
+    }
+    
+    const orderToUpdate = user.historyOrder.find(o => o.id === orderId);
+    
+    const updateData = {
+        status: newStatus,
+        sn: newSn !== undefined ? newSn : orderToUpdate.sn,
+    };
+    
+    await editHistoryOrder(userId, orderId, updateData);
+
+    return res.status(200).json({
+      success: true,
+      message: `Status order dengan ID ${orderId} berhasil diubah.`,
+    });
+
+  } catch (error) {
+    console.error("❌ Error saat update status order oleh admin:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Terjadi kesalahan pada server.",
+      error: error.message,
+    });
+  }
+});
+
+app.get('/check-order', requireAdmin, async (req, res) => {
+  const { id, type = 'prabayar' } = req.query;
+
+  if (!id) {
+    return res.status(400).json({
+      success: false,
+      message: '❌ ID transaksi tidak boleh kosong'
+    });
+  }
+
+  try {
+    const response = await axios.post(
+      'https://atlantich2h.com/transaksi/status',
+      qs.stringify({
+        api_key: ATLAN_API_KEY,
+        id,
+        type
+      }),
+      {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        }
+      }
+    );
+
+    const result = response.data;
+
+    if (!result.status || !result.data) {
+      return res.status(404).json({
+        success: false,
+        message: '⚠️ Transaksi tidak ditemukan atau gagal'
+      });
+    }
+
+    const data = result.data;
+
+    // 🔁 Bangun ulang response-nya (tanpa copy mentah dari Atlantic)
+    res.json({
+      success: true,
+      message: 'Status transaksi berhasil diambil',
+      status: data.status,
+      detail: {
+        id: data.id,
+        reff_id: data.reff_id,
+        layanan: data.layanan,
+        kode: data.code,
+        target: data.target,
+        harga: Number(data.price),
+        sn: data.sn?.trim() || null,
+        waktu: data.created_at
+      }
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: '❌ Gagal memproses permintaan',
+      error: error?.response?.data || error.message
+    });
+  }
+});
+
+
 app.use((req, res) => {
   res.status(404).sendFile(path.join(__dirname, "public", "404.html"));
 });
