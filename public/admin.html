@@ -6,7 +6,6 @@
   <title>Admin Dashboard Pro</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
   <style>
     :root {
@@ -21,11 +20,6 @@
       --text-primary-dark: #1a252f; 
       --text-secondary-dark: #52616b; 
       --primary-accent: #3498db;
-      --bs-success-rgb: 40, 167, 69;
-      --bs-danger-rgb: 220, 53, 69;
-      --bs-warning-rgb: 255, 193, 7;
-      --bs-info-rgb: 23, 162, 184;
-      --bs-primary-rgb: 52, 152, 219;
     }
     body {
       background-color: var(--content-bg);
@@ -109,7 +103,7 @@
     }
     .page-title i { margin-right: 0.75rem; color: var(--primary-accent); font-size: 1.5rem; }
     .user-select-all { user-select: all; }
-    pre { white-space: pre-wrap; word-break: break-all; font-size: 0.85rem; }
+    pre { white-space: pre-wrap; word-break: break-all; font-size: 0.85rem; background-color: #e9ecef; border-radius: 0.25rem; padding: 0.5rem; }
   </style>
 </head>
 <body>
@@ -175,7 +169,7 @@
                     <div class="col-lg-8">
                         <p class="text-muted text-center">Masukkan ID Transaksi (bukan Reff ID) yang didapat dari provider untuk memeriksa statusnya secara langsung.</p>
                         <div class="input-group mb-3">
-                            <input type="text" id="checkOrderIdInput" class="form-control form-control-lg" placeholder="Contoh: 12345678">
+                            <input type="text" id="checkOrderIdInput" class="form-control form-control-lg" placeholder="Contoh: Gfrc9v33mAGfKo2jctX1">
                             <button class="btn btn-primary" type="button" id="checkOrderBtn" onclick="checkOrderStatus()">
                                 <i class="bi bi-search me-1"></i> Periksa
                             </button>
@@ -325,7 +319,8 @@
       tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-muted">Tidak ada riwayat transaksi.</td></tr>`;
     } else {
       paginatedHistory.forEach(h => {
-        const statusBadge = h.status.toLowerCase() === 'success' ? 'success' : (h.status.toLowerCase().includes('fail') || h.status.toLowerCase().includes('error') ? 'danger' : 'warning');
+        const statusText = h.status || 'N/A';
+        const statusClass = statusText.toLowerCase() === 'success' ? 'success' : (statusText.toLowerCase() === 'failed' || statusText.toLowerCase() === 'cancel' || statusText.toLowerCase() === 'expired' ? 'danger' : 'warning');
         const tr = document.createElement('tr');
         tr.className = 'clickable-row';
         tr.onclick = () => openTransactionModal(h.id, h.type);
@@ -334,12 +329,12 @@
             <td>${h.username}</td>
             <td>${h.type === 'Order' ? h.layanan : h.metode}</td>
             <td>${formatRupiah(h.type === 'Order' ? h.price : h.get_balance)}</td>
-            <td><span class="badge text-bg-${statusBadge}">${h.status}</span></td>
+            <td><span class="badge text-bg-${statusClass}">${statusText}</span></td>
             <td><small class="text-muted">${h.reff_id || 'N/A'}</small></td>`;
         tbody.appendChild(tr);
       });
     }
-    renderPagination('globalHistoryPagination', flatHistoryCache.length, page, GLOBAL_HISTORY_ITEMS_PER_PAGE, loadGlobalHistory);
+    renderPagination(document.getElementById('globalHistoryPagination'), flatHistoryCache.length, page, GLOBAL_HISTORY_ITEMS_PER_PAGE, loadGlobalHistory);
   };
   
   const openTransactionModal = (transactionId, type) => {
@@ -359,7 +354,12 @@
     </ul>`;
 
     let formHtml = `<h6 class="text-primary">Form Perubahan</h6>`;
-    const statusOptions = ['Success', 'Pending', 'Processing', 'Failed', 'Error'];
+    let statusOptions;
+    if (type === 'Deposit') {
+        statusOptions = ['Success', 'Pending', 'Expired', 'Cancel'];
+    } else {
+        statusOptions = ['Success', 'Pending', 'Failed'];
+    }
     let optionsHtml = statusOptions.map(s => `<option value="${s}" ${s.toLowerCase() === trx.status.toLowerCase() ? 'selected' : ''}>${s}</option>`).join('');
     
     formHtml += `
@@ -433,57 +433,76 @@
         const result = await response.json();
         
         let contentHtml = '';
-        if (result.success) {
+        if (result.success && result.detail) {
             const d = result.detail;
-            const statusBadge = d.status.toLowerCase() === 'success' ? 'success' : (d.status.toLowerCase().includes('fail') ? 'danger' : 'warning');
+            const statusClass = d.status.toLowerCase() === 'success' ? 'success' : (d.status.toLowerCase().includes('fail') ? 'danger' : 'warning');
             contentHtml = `
-                <div class="card bg-light">
+                <div class="card bg-light border-0 shadow-sm">
                     <div class="card-body">
-                        <h5 class="card-title text-center mb-3">Hasil Pengecekan</h5>
-                        <ul class="list-group">
-                            <li class="list-group-item d-flex justify-content-between align-items-center">Status <span class="badge bg-${statusBadge} fs-6">${d.status}</span></li>
-                            <li class="list-group-item d-flex justify-content-between align-items-center">ID Transaksi <strong class="user-select-all">${d.id}</strong></li>
-                            <li class="list-group-item d-flex justify-content-between align-items-center">Reff ID <strong class="user-select-all">${d.reff_id}</strong></li>
-                            <li class="list-group-item d-flex justify-content-between align-items-center">Layanan <strong>${d.layanan}</strong></li>
-                            <li class="list-group-item d-flex justify-content-between align-items-center">Target <strong class="user-select-all">${d.target}</strong></li>
-                            <li class="list-group-item d-flex justify-content-between align-items-center">Harga <strong class="text-danger">${formatRupiah(d.harga)}</strong></li>
-                            <li class="list-group-item d-flex justify-content-between align-items-center">Waktu <strong >${formatTanggalIndo(d.waktu)}</strong></li>
-                            <li class="list-group-item">
-                                <div class="d-flex justify-content-between"><span>SN / Catatan</span></div>
-                                <pre class="p-2 mt-1 bg-white rounded">${d.sn || 'Tidak ada SN.'}</pre>
+                        <h5 class="card-title text-center mb-4 text-primary">Hasil Pengecekan</h5>
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item d-flex justify-content-between align-items-center bg-transparent">Status <span class="badge fs-6 text-bg-${statusClass}">${d.status}</span></li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center bg-transparent">ID Transaksi <strong class="user-select-all">${d.id}</strong></li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center bg-transparent">Reff ID <strong class="user-select-all">${d.reff_id}</strong></li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center bg-transparent">Layanan <strong>${d.layanan}</strong></li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center bg-transparent">Target <strong class="user-select-all">${d.target}</strong></li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center bg-transparent">Harga <strong class="text-danger">${formatRupiah(d.harga)}</strong></li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center bg-transparent">Waktu <strong>${formatTanggalIndo(d.waktu)}</strong></li>
+                            <li class="list-group-item bg-transparent px-0">
+                                <div class="d-flex justify-content-between mb-1 px-3"><span>SN / Catatan</span></div>
+                                <pre>${d.sn || 'Tidak ada SN.'}</pre>
                             </li>
                         </ul>
                     </div>
                 </div>`;
         } else {
-            contentHtml = `<div class="alert alert-danger text-center">${result.message}</div>`;
+            contentHtml = `<div class="alert alert-danger text-center">${result.message || 'Gagal mengambil data transaksi.'}</div>`;
         }
         resultContainer.innerHTML = contentHtml;
     } catch (error) {
-        resultContainer.innerHTML = `<div class="alert alert-danger text-center">Terjadi kesalahan jaringan saat memeriksa status.</div>`;
+        resultContainer.innerHTML = `<div class="alert alert-danger text-center">Terjadi kesalahan. Pastikan Anda login sebagai admin dan coba lagi.</div>`;
     } finally {
         spinner.classList.add('d-none');
     }
   };
   
-  const renderPagination = (containerId, totalItems, currentPage, itemsPerPage, callback) => {
-    const pc = document.getElementById(containerId);
-    pc.innerHTML = '';
+  const renderPagination = (container, totalItems, currentPage, itemsPerPage, callback) => {
+    if (!container) return;
+    container.innerHTML = '';
     const totalPages = Math.ceil(totalItems / itemsPerPage);
     if (totalPages <= 1) return;
     const ul = document.createElement('ul');
     ul.className = 'pagination pagination-sm';
-    const createPageItem = (pageNum, text, isDisabled = false) => {
+    const createPageItem = (pageNum, text, isActive = false, isDisabled = false) => {
         const li = document.createElement('li');
-        li.className = `page-item ${currentPage === pageNum ? 'active' : ''} ${isDisabled ? 'disabled' : ''}`;
+        li.className = `page-item ${isActive ? 'active' : ''} ${isDisabled ? 'disabled' : ''}`;
         const a = document.createElement('a'); a.className = 'page-link'; a.href = '#'; a.innerHTML = text;
         if (!isDisabled) a.onclick = (e) => { e.preventDefault(); callback(pageNum); };
         li.appendChild(a); return li;
     };
-    ul.appendChild(createPageItem(currentPage - 1, '«', currentPage === 1));
-    for (let i = 1; i <= totalPages; i++) ul.appendChild(createPageItem(i, i));
-    ul.appendChild(createPageItem(currentPage + 1, '»', currentPage === totalPages));
-    pc.appendChild(ul);
+
+    ul.appendChild(createPageItem(currentPage - 1, '«', false, currentPage === 1));
+    let startPage = Math.max(1, currentPage - 2);
+    let endPage = Math.min(totalPages, currentPage + 2);
+    if (totalPages > 5) {
+      if (currentPage <= 3) endPage = 5;
+      else if (currentPage >= totalPages - 2) startPage = totalPages - 4;
+    } else {
+      startPage = 1; endPage = totalPages;
+    }
+
+    if (startPage > 1) {
+      ul.appendChild(createPageItem(1, '1'));
+      if(startPage > 2) ul.appendChild(createPageItem(0, '...', false, true));
+    }
+    for (let i = startPage; i <= endPage; i++) ul.appendChild(createPageItem(i, i, i === currentPage));
+
+    if (endPage < totalPages) {
+      if(endPage < totalPages - 1) ul.appendChild(createPageItem(0, '...', false, true));
+      ul.appendChild(createPageItem(totalPages, totalPages));
+    }
+    ul.appendChild(createPageItem(currentPage + 1, '»', false, currentPage === totalPages));
+    container.appendChild(ul);
   };
 
   document.addEventListener('DOMContentLoaded', fetchDataAndInitialize);
