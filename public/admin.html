@@ -73,9 +73,6 @@
       border-bottom: 1px solid #e3e6f0; font-weight: 600;
       padding: 0.9rem 1.25rem; color: var(--primary-accent);
     }
-    .card-title { font-weight: 500; margin-bottom: 0.25rem; font-size: 1.1rem;}
-    .card-subtitle { color: var(--text-secondary-dark); font-size: 0.85rem; }
-
     .stat-card .card-body { padding: 1.25rem; }
     .stat-card .stat-main { display: flex; align-items: center; }
     .stat-card .stat-icon-bg {
@@ -84,12 +81,6 @@
     }
     .stat-card .stat-info .stat-value { font-size: 1.6rem; font-weight: 700; line-height: 1.2; }
     .stat-card .stat-info .stat-label { font-size: 0.8rem; color: var(--text-secondary-dark); text-transform: uppercase; }
-
-    .bg-soft-primary { background-color: rgba(var(--bs-primary-rgb), 0.1); }
-    .bg-soft-success { background-color: rgba(var(--bs-success-rgb), 0.1); }
-    .bg-soft-warning { background-color: rgba(var(--bs-warning-rgb), 0.1); }
-    .bg-soft-info   { background-color: rgba(var(--bs-info-rgb), 0.1); }
-    .text-primary { color: var(--primary-accent) !important; }
 
     .overlay {
       display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -108,29 +99,17 @@
       .overlay.show { display: block; }
       .content { margin-left: 0; width: 100%; padding: 1.5rem 1rem; }
       .mobile-header { display: flex; }
-      .stat-card .stat-info .stat-value { font-size: 1.4rem; }
     }
-    .table-responsive { overflow-x: auto; }
-    .user-select-all { user-select: all; }
-    .chart-container { position: relative; min-height: 300px; width: 100%; }
-    .form-control, .form-select { font-size: 0.875rem; border-radius: 0.3rem; }
-    .btn { font-size: 0.875rem; border-radius: 0.3rem; padding: 0.4rem 0.8rem; }
-    .modal-xl { max-width: 1140px; }
-    .badge { font-size: 0.7rem; padding: 0.35em 0.55em; font-weight: 500; }
-    .list-group-item { padding: 0.7rem 1rem; font-size: 0.9rem; }
-    .sticky-top { z-index: 100; }
     .data-table th { font-weight: 500; font-size: 0.85rem; text-transform: uppercase; color: var(--text-secondary-dark); }
     .data-table td { font-size: 0.875rem; vertical-align: middle; }
-    .data-table tr:hover { background-color: #f8f9fa; }
+    .data-table tr.clickable-row:hover { background-color: #f8f9fa; cursor: pointer; }
     .page-title {
         font-size: 1.6rem; font-weight: 500; margin-bottom: 1.75rem; display: flex; align-items: center;
         color: var(--text-primary-dark);
     }
     .page-title i { margin-right: 0.75rem; color: var(--primary-accent); font-size: 1.5rem; }
-    .pagination .page-link { font-size: 0.85rem; padding: 0.4rem 0.75rem; }
-    .form-control-sm { font-size: 0.8rem !important; }
-    .form-select-sm { font-size: 0.8rem !important; }
-    .clickable-row { cursor: pointer; }
+    .user-select-all { user-select: all; }
+    pre { white-space: pre-wrap; word-break: break-all; font-size: 0.85rem; }
   </style>
 </head>
 <body>
@@ -147,7 +126,7 @@
     <ul>
       <li onclick="showSection('dashboard')" class="active-link" id="nav-dashboard"><i class="bi bi-speedometer2"></i>Dashboard</li>
       <li onclick="showSection('users')" id="nav-users"><i class="bi bi-people"></i>Manajemen User</li>
-      <li onclick="showSection('transaksi')" id="nav-transaksi"><i class="bi bi-bar-chart-line"></i>Laporan Transaksi</li>
+      <li onclick="showSection('check-order')" id="nav-check-order"><i class="bi bi-clipboard-check"></i>Check Order</li>
       <li onclick="showSection('globalHistory')" id="nav-globalHistory"><i class="bi bi-archive"></i>Global History</li>
       <li onclick="logout()"><i class="bi bi-box-arrow-right"></i>Logout</li>
     </ul>
@@ -158,125 +137,54 @@
       <h3 class="page-title"><i class="bi bi-speedometer2"></i>Dashboard Overview</h3>
       <div class="row">
         <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card stat-card h-100">
-                <div class="card-body">
-                    <div class="stat-main">
-                        <div class="stat-icon-bg bg-primary"><i class="bi bi-people-fill"></i></div>
-                        <div class="stat-info ms-2">
-                            <p class="stat-value" id="totalUsersCount">0</p>
-                            <p class="stat-label">Total Users</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <div class="card stat-card h-100"><div class="card-body"><div class="stat-main"><div class="stat-icon-bg bg-primary"><i class="bi bi-people-fill"></i></div><div class="stat-info ms-2"><p class="stat-value" id="totalUsersCount">0</p><p class="stat-label">Total Users</p></div></div></div></div>
         </div>
         <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card stat-card h-100">
-                <div class="card-body">
-                    <div class="stat-main">
-                        <div class="stat-icon-bg bg-success"><i class="bi bi-person-check-fill"></i></div>
-                        <div class="stat-info ms-2">
-                            <p class="stat-value" id="verifiedUsersCount">0</p>
-                            <p class="stat-label">Verified Users</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <div class="card stat-card h-100"><div class="card-body"><div class="stat-main"><div class="stat-icon-bg bg-success"><i class="bi bi-person-check-fill"></i></div><div class="stat-info ms-2"><p class="stat-value" id="verifiedUsersCount">0</p><p class="stat-label">Verified Users</p></div></div></div></div>
         </div>
         <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card stat-card h-100">
-                <div class="card-body">
-                    <div class="stat-main">
-                        <div class="stat-icon-bg bg-warning"><i class="bi bi-person-x-fill"></i></div>
-                        <div class="stat-info ms-2">
-                            <p class="stat-value" id="unverifiedUsersCount">0</p>
-                            <p class="stat-label">Unverified Users</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <div class="card stat-card h-100"><div class="card-body"><div class="stat-main"><div class="stat-icon-bg bg-warning"><i class="bi bi-person-x-fill"></i></div><div class="stat-info ms-2"><p class="stat-value" id="unverifiedUsersCount">0</p><p class="stat-label">Unverified Users</p></div></div></div></div>
         </div>
         <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card stat-card h-100">
-                <div class="card-body">
-                    <div class="stat-main">
-                         <div class="stat-icon-bg bg-info"><i class="bi bi-wallet2"></i></div>
-                         <div class="stat-info ms-2">
-                            <p class="stat-value" id="totalSaldoAllUsers">Rp 0</p>
-                            <p class="stat-label">Total Saldo Users</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-          </div>
+            <div class="card stat-card h-100"><div class="card-body"><div class="stat-main"><div class="stat-icon-bg bg-info"><i class="bi bi-wallet2"></i></div><div class="stat-info ms-2"><p class="stat-value" id="totalSaldoAllUsers">Rp 0</p><p class="stat-label">Total Saldo Users</p></div></div></div></div>
+        </div>
       </div>
     </div>
 
     <div id="users" class="main-section">
       <h3 class="page-title"><i class="bi bi-people"></i>Manajemen Pengguna</h3>
-        <div class="card">
-            <div class="card-header">
-                Daftar Pengguna Sistem
-            </div>
-            <div class="card-body">
-                <div class="row mb-3 gy-2">
-                    <div class="col-lg-8 col-md-7">
-                        <div class="input-group">
-                            <span class="input-group-text"><i class="bi bi-search"></i></span>
-                            <input type="text" id="userSearchInput" class="form-control form-control-sm" placeholder="Cari username, nama, atau email...">
-                        </div>
-                    </div>
-                    <div class="col-lg-4 col-md-5">
-                        <select id="userRoleFilter" class="form-select form-select-sm">
-                            <option value="">Semua Role</option>
-                            <option value="admin">Admin</option>
-                            <option value="user">User</option>
-                            <option value="reseller">Reseller</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="table-responsive">
-                    <table class="table table-hover table-striped align-middle data-table">
-                    <thead class="table-light">
-                        <tr>
-                        <th>#</th><th>Nama Lengkap</th><th>Username & Saldo</th>
-                        <th>Email</th><th>Role</th><th>Verifikasi</th><th>Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody id="userTableBody"></tbody>
-                    </table>
-                </div>
-                <div id="userTablePagination" class="mt-3 d-flex justify-content-center"></div>
-            </div>
+      <div class="card">
+        <div class="card-header">Daftar Pengguna Sistem</div>
+        <div class="card-body">
+          <div class="table-responsive">
+            <table class="table table-hover table-striped align-middle data-table">
+              <thead class="table-light"><tr><th>#</th><th>Nama Lengkap</th><th>Username & Saldo</th><th>Email</th><th>Role</th><th>Verifikasi</th><th>Aksi</th></tr></thead>
+              <tbody id="userTableBody"></tbody>
+            </table>
+          </div>
         </div>
+      </div>
     </div>
 
-    <div id="transaksi" class="main-section">
-      <h3 class="page-title"><i class="bi bi-bar-chart-line"></i>Laporan Transaksi</h3>
-        <div class="row mb-4">
-            <div class="col-lg-6 mb-4 mb-lg-0">
-                <div class="card h-100">
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        Total Deposit Sukses
-                        <small class="text-muted">(7 Hari Terakhir)</small>
-                    </div>
-                    <div class="card-body">
-                        <div class="chart-container">
-                            <canvas id="depositChart"></canvas>
+    <div id="check-order" class="main-section">
+        <h3 class="page-title"><i class="bi bi-clipboard-check"></i>Check Status Order Manual</h3>
+        <div class="card">
+            <div class="card-header">Periksa Status Transaksi di Provider</div>
+            <div class="card-body">
+                <div class="row justify-content-center">
+                    <div class="col-lg-8">
+                        <p class="text-muted text-center">Masukkan ID Transaksi (bukan Reff ID) yang didapat dari provider untuk memeriksa statusnya secara langsung.</p>
+                        <div class="input-group mb-3">
+                            <input type="text" id="checkOrderIdInput" class="form-control form-control-lg" placeholder="Contoh: 12345678">
+                            <button class="btn btn-primary" type="button" id="checkOrderBtn" onclick="checkOrderStatus()">
+                                <i class="bi bi-search me-1"></i> Periksa
+                            </button>
                         </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-6">
-                <div class="card h-100">
-                     <div class="card-header d-flex justify-content-between align-items-center">
-                        Total Order Sukses
-                        <small class="text-muted">(7 Hari Terakhir)</small>
-                    </div>
-                    <div class="card-body">
-                        <div class="chart-container">
-                            <canvas id="orderChart"></canvas>
+                        <div id="checkOrderSpinner" class="text-center my-4 d-none">
+                            <div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div>
+                            <p class="mt-2">Memeriksa status...</p>
                         </div>
+                        <div id="checkOrderResultContainer" class="mt-4"></div>
                     </div>
                 </div>
             </div>
@@ -286,28 +194,11 @@
     <div id="globalHistory" class="main-section">
         <h3 class="page-title"><i class="bi bi-archive"></i>Global History Semua User</h3>
         <div class="card">
-            <div class="card-header">Riwayat Transaksi Seluruh Pengguna (Klik baris untuk detail)</div>
+            <div class="card-header">Riwayat Transaksi (Klik baris untuk edit/detail)</div>
             <div class="card-body">
-                <div class="row mb-3 gy-2">
-                    <div class="col-lg-8 col-md-7">
-                        <div class="input-group">
-                            <span class="input-group-text"><i class="bi bi-search"></i></span>
-                            <input type="text" id="globalHistorySearchInput" class="form-control form-control-sm" placeholder="Cari layanan, username, reff_id, atau target...">
-                        </div>
-                    </div>
-                    <div class="col-lg-4 col-md-5">
-                        <select id="globalHistoryCategoryFilter" class="form-select form-select-sm">
-                            <option value="">Semua Kategori</option>
-                            <option value="Deposit">Deposit</option>
-                            <option value="Order">Order</option>
-                        </select>
-                    </div>
-                </div>
                 <div class="table-responsive">
                     <table class="table table-sm table-hover table-striped align-middle data-table">
-                        <thead class="table-light">
-                            <tr><th>Tanggal</th><th>Username</th><th>Aktivitas</th><th>Nominal/Harga</th><th>Status</th><th>Reff ID</th></tr>
-                        </thead>
+                        <thead class="table-light"><tr><th>Tanggal</th><th>Username</th><th>Aktivitas</th><th>Nominal/Harga</th><th>Status</th><th>Reff ID</th></tr></thead>
                         <tbody id="globalHistoryTableBody"></tbody>
                     </table>
                 </div>
@@ -319,59 +210,30 @@
   </div>
 </div>
 
-<div class="modal fade" id="userDetailModal" tabindex="-1" aria-labelledby="userDetailModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-xl modal-dialog-scrollable">
-    <div class="modal-content">
-      <div class="modal-header bg-light">
-        <h5 class="modal-title" id="userDetailModalLabel"><i class="bi bi-person-lines-fill me-2 text-primary"></i>Detail Pengguna</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body p-4" id="userDetailModalBody">
-        <div class="text-center" style="padding: 2rem 0;">
-          <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;"><span class="visually-hidden">Loading...</span></div>
-          <p class="mt-2 text-muted">Memuat detail pengguna...</p>
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal"><i class="bi bi-x-lg me-1"></i>Tutup</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div class="modal fade" id="transactionDetailModal" tabindex="-1" aria-labelledby="transactionDetailModalLabel" aria-hidden="true">
+<div class="modal fade" id="transactionModal" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
     <div class="modal-content">
       <div class="modal-header bg-light">
-        <h5 class="modal-title" id="transactionDetailModalLabel"><i class="bi bi-receipt-cutoff me-2 text-primary"></i>Detail Transaksi</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <h5 class="modal-title" id="transactionModalLabel"></h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
-      <div class="modal-body p-4" id="transactionDetailModalBody">
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Tutup</button>
-      </div>
+      <div class="modal-body p-4" id="transactionModalBody"></div>
+      <div class="modal-footer" id="transactionModalFooter"></div>
     </div>
   </div>
 </div>
-
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script>
   let allUsersData = [];
-  let userDetailModalInstance = null;
-  let transactionDetailModalInstance = null;
-  let depositChartInstance = null;
-  let orderChartInstance = null;
+  let flatHistoryCache = [];
+  let transactionModalInstance = null;
   let globalHistoryCurrentPage = 1;
-  const GLOBAL_HISTORY_ITEMS_PER_PAGE = 20;
-  let userTableCurrentPage = 1;
-  const USER_TABLE_ITEMS_PER_PAGE = 10;
+  const GLOBAL_HISTORY_ITEMS_PER_PAGE = 25;
 
   const toggleSidebar = () => {
-    const s = document.getElementById('sidebar'), o = document.getElementById('overlay');
-    s.classList.toggle('show');
-    o.classList.toggle('show');
+    document.getElementById('sidebar').classList.toggle('show');
+    document.getElementById('overlay').classList.toggle('show');
   };
 
   const showSection = (id) => {
@@ -380,11 +242,6 @@
     document.querySelectorAll('.sidebar ul li').forEach(l => l.classList.remove('active-link'));
     document.getElementById(`nav-${id}`).classList.add('active-link');
     if (window.innerWidth <= 992 && document.getElementById('sidebar').classList.contains('show')) toggleSidebar();
-    
-    if (id === 'dashboard') loadDashboardStats();
-    if (id === 'users') loadUsersTable(1);
-    if (id === 'transaksi') { renderTransactionCharts(); }
-    if (id === 'globalHistory') loadGlobalHistory(1);
   };
 
   const logout = () => { window.location.href = '/auth/logout'; };
@@ -392,18 +249,12 @@
     if (val === undefined || val === null || isNaN(Number(val))) return 'Rp 0';
     return `Rp ${Number(val).toLocaleString('id-ID')}`;
   };
-  const getDateStr = (d) => d.toISOString().split('T')[0];
-  const formatTanggalIndo = (iso, withTime = true) => {
+  const formatTanggalIndo = (iso) => {
     if (!iso) return 'N/A';
     try {
         const d = new Date(iso);
         if (isNaN(d.getTime())) return 'Tgl Invalid';
-        const options = { day: '2-digit', month: 'short', year: 'numeric' };
-        if (withTime) {
-            options.hour = '2-digit';
-            options.minute = '2-digit';
-        }
-        return d.toLocaleString('id-ID', options).replace(/\./g, ':');
+        return d.toLocaleString('id-ID', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }).replace(/\./g, ':');
     } catch (e) {
         return 'Err Tgl';
     }
@@ -414,16 +265,24 @@
         const response = await fetch('/data/users');
         if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
         allUsersData = await response.json();
-        const currentActiveSection = document.querySelector('.sidebar ul li.active-link')?.id.replace('nav-', '') || 'dashboard';
-        showSection(currentActiveSection);
+        
+        flatHistoryCache = [];
+        allUsersData.forEach(user => {
+            (user.historyDeposit || []).forEach(h => flatHistoryCache.push({ ...h, userId: user._id, username: user.username, type: 'Deposit' }));
+            (user.historyOrder || []).forEach(h => flatHistoryCache.push({ ...h, userId: user._id, username: user.username, type: 'Order' }));
+        });
+        flatHistoryCache.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+
+        loadDashboardStats();
+        loadUsersTable();
+        loadGlobalHistory(globalHistoryCurrentPage);
+
     } catch (e) {
         document.body.innerHTML = `<div class="alert alert-danger m-5">Gagal memuat data dari server. Silakan refresh halaman. Error: ${e.message}</div>`;
     }
   };
   
   const loadDashboardStats = () => {
-    if (!allUsersData.length) return;
-    
     let verifiedCount = 0;
     let totalSaldo = 0;
     allUsersData.forEach(u => {
@@ -437,353 +296,197 @@
     document.getElementById('totalSaldoAllUsers').textContent = formatRupiah(totalSaldo);
   };
   
-  const renderPagination = (containerId, totalItems, currentPage, itemsPerPage, callback) => {
-    const pc = document.getElementById(containerId);
-    if (!pc) return;
-    pc.innerHTML = '';
-    const totalPages = Math.ceil(totalItems / itemsPerPage);
-    if (totalPages <= 1) return;
-
-    const ul = document.createElement('ul');
-    ul.className = 'pagination pagination-sm';
-
-    const createPageItem = (pageNum, text, isActive = false, isDisabled = false) => {
-        const li = document.createElement('li');
-        li.className = `page-item ${isActive ? 'active' : ''} ${isDisabled ? 'disabled' : ''}`;
-        const a = document.createElement('a');
-        a.className = 'page-link';
-        a.href = '#';
-        a.innerHTML = text;
-        if (!isDisabled && pageNum !== 0) {
-            a.onclick = (e) => {
-                e.preventDefault();
-                callback(pageNum);
-            };
-        }
-        li.appendChild(a);
-        return li;
-    };
-
-    ul.appendChild(createPageItem(currentPage - 1, '«', false, currentPage === 1));
-    
-    let startPage = Math.max(1, currentPage - 2);
-    let endPage = Math.min(totalPages, currentPage + 2);
-    
-    if (totalPages <= 5) {
-        startPage = 1;
-        endPage = totalPages;
-    } else {
-        if (currentPage <= 3) endPage = 5;
-        else if (currentPage >= totalPages - 2) startPage = totalPages - 4;
-    }
-
-    if (startPage > 1) {
-        ul.appendChild(createPageItem(1, '1'));
-        if (startPage > 2) ul.appendChild(createPageItem(0, '...', false, true));
-    }
-
-    for (let i = startPage; i <= endPage; i++) {
-        ul.appendChild(createPageItem(i, i, i === currentPage));
-    }
-
-    if (endPage < totalPages) {
-        if (endPage < totalPages - 1) ul.appendChild(createPageItem(0, '...', false, true));
-        ul.appendChild(createPageItem(totalPages, totalPages));
-    }
-
-    ul.appendChild(createPageItem(currentPage + 1, '»', false, currentPage === totalPages));
-    pc.appendChild(ul);
-  };
-
-  const loadUsersTable = (page = 1) => {
-    userTableCurrentPage = page;
+  const loadUsersTable = () => {
     const tbody = document.getElementById('userTableBody');
-    if (!tbody) return;
-    
-    if (!allUsersData.length) {
-        tbody.innerHTML = `<tr><td colspan="7" class="text-center py-4 text-muted">Memuat data pengguna...</td></tr>`;
-        return;
-    }
-
-    const searchValue = document.getElementById('userSearchInput')?.value.toLowerCase() || '';
-    const roleValue = document.getElementById('userRoleFilter')?.value || '';
-    
-    const filteredUsers = allUsersData.filter(u => 
-      (!roleValue || u.role === roleValue) &&
-      (!searchValue || 
-        (u.username && u.username.toLowerCase().includes(searchValue)) || 
-        (u.fullname && u.fullname.toLowerCase().includes(searchValue)) || 
-        (u.email && u.email.toLowerCase().includes(searchValue))
-      )
-    );
-
-    const startIndex = (page - 1) * USER_TABLE_ITEMS_PER_PAGE;
-    const endIndex = startIndex + USER_TABLE_ITEMS_PER_PAGE;
-    const paginatedUsers = filteredUsers.slice(startIndex, endIndex);
-    
     tbody.innerHTML = '';
-    if (paginatedUsers.length === 0) {
-      tbody.innerHTML = `<tr><td colspan="7" class="text-center py-4 text-muted">Tidak ada pengguna yang cocok dengan kriteria.</td></tr>`;
-    } else {
-      paginatedUsers.forEach((u, index) => {
+    allUsersData.forEach((u, index) => {
         const roleBadge = u.role === 'admin' ? 'danger' : (u.role === 'reseller' ? 'info' : 'primary');
         const tr = document.createElement('tr');
         tr.innerHTML = `
-          <td>${startIndex + index + 1}</td>
+          <td>${index + 1}</td>
           <td>${u.fullname || 'N/A'}</td>
-          <td><strong>${u.username}</strong><br><small class="text-muted">Saldo: ${formatRupiah(u.saldo || 0)}</small></td>
+          <td><strong>${u.username}</strong><br><small class="text-muted">${formatRupiah(u.saldo || 0)}</small></td>
           <td>${u.email || 'N/A'}</td>
           <td><span class="badge text-bg-${roleBadge}">${u.role || 'user'}</span></td>
-          <td><span class="badge ${u.isVerified ? 'text-bg-success' : 'text-bg-warning'}">${u.isVerified ? '<i class="bi bi-check-circle me-1"></i>Verified' : '<i class="bi bi-hourglass-split me-1"></i>Pending'}</span></td>
-          <td>
-            <button class="btn btn-sm btn-outline-primary me-1 py-1 px-2" onclick="showUserDetail('${u._id}')" title="Detail"><i class="bi bi-eye-fill"></i></button>
-            ${!u.isVerified ? `<button class="btn btn-sm btn-outline-success py-1 px-2" onclick="event.stopPropagation(); verifyUser('${u.username}');" title="Verifikasi"><i class="bi bi-patch-check-fill"></i></button>` : ''}
-          </td>`;
+          <td><span class="badge ${u.isVerified ? 'text-bg-success' : 'text-bg-warning'}">${u.isVerified ? 'Verified' : 'Pending'}</span></td>
+          <td>${!u.isVerified ? `<button class="btn btn-sm btn-outline-success py-1 px-2" onclick="verifyUser('${u.username}')" title="Verifikasi"><i class="bi bi-patch-check-fill"></i></button>` : ''}</td>`;
         tbody.appendChild(tr);
       });
-    }
-    renderPagination('userTablePagination', filteredUsers.length, page, USER_TABLE_ITEMS_PER_PAGE, loadUsersTable);
-  };
-  
-  const aggregateDataForChart = (days, type) => {
-    const dataMap = {};
-    const today = new Date();
-    for (let i = 0; i < days; i++) {
-        const d = new Date(today);
-        d.setDate(today.getDate() - i);
-        dataMap[getDateStr(d)] = 0;
-    }
-    
-    allUsersData.forEach(user => {
-        const historySource = type === 'Deposit' ? user.historyDeposit : user.historyOrder;
-        if (historySource && Array.isArray(historySource)) {
-            historySource.forEach(h => {
-                if (h.status.toLowerCase() === 'success') {
-                    const hDateStr = getDateStr(new Date(h.created_at));
-                    if (dataMap.hasOwnProperty(hDateStr)) {
-                        const amount = type === 'Deposit' ? h.get_balance : h.price;
-                        dataMap[hDateStr] += amount || 0;
-                    }
-                }
-            });
-        }
-    });
-
-    const labels = Object.keys(dataMap).sort((a, b) => new Date(a) - new Date(b));
-    const data = labels.map(label => dataMap[label]);
-    return { labels: labels.map(l => formatTanggalIndo(l, false)), data };
   };
 
-  const renderTransactionCharts = () => {
-    if (!allUsersData.length) return;
-
-    const depositChartData = aggregateDataForChart(7, 'Deposit');
-    const orderChartData = aggregateDataForChart(7, 'Order');
-
-    const chartOptions = {
-        responsive: true,
-        maintainAspectRatio: false,
-        scales: { y: { beginAtZero: true, ticks: { callback: v => formatRupiah(v).replace('Rp ', '') } } },
-        plugins: { tooltip: { callbacks: { label: c => `${c.dataset.label}: ${formatRupiah(c.raw)}` } } }
-    };
-
-    const depositCtx = document.getElementById('depositChart');
-    if (depositCtx) {
-        if (depositChartInstance) depositChartInstance.destroy();
-        depositChartInstance = new Chart(depositCtx, { type: 'line', data: { labels: depositChartData.labels, datasets: [{ label: 'Deposit', data: depositChartData.data, borderColor: '#3498db', backgroundColor: 'rgba(52,152,219,0.1)', tension: 0.3, fill: true }] }, options: chartOptions });
-    }
-    const orderCtx = document.getElementById('orderChart');
-    if (orderCtx) {
-        if (orderChartInstance) orderChartInstance.destroy();
-        orderChartInstance = new Chart(orderCtx, { type: 'line', data: { labels: orderChartData.labels, datasets: [{ label: 'Order', data: orderChartData.data, borderColor: '#e74c3c', backgroundColor: 'rgba(231,76,60,0.1)', tension: 0.3, fill: true }] }, options: chartOptions });
-    }
-  };
-  
-  const showUserDetail = (userId) => {
-    event.stopPropagation();
-    const user = allUsersData.find(u => u._id === userId);
-    const modalBody = document.getElementById('userDetailModalBody');
-    const modalTitle = document.getElementById('userDetailModalLabel');
-    
-    modalBody.innerHTML = `<div class="text-center py-5"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></div>`;
-    
-    if (!userDetailModalInstance) userDetailModalInstance = new bootstrap.Modal(document.getElementById('userDetailModal'));
-    userDetailModalInstance.show();
-
-    if (user) {
-      modalTitle.textContent = `Detail Pengguna: ${user.username || 'N/A'}`;
-      const detailContent = `
-        <div class="row g-4">
-          <div class="col-lg-3 text-center">
-            <img src="${user.profileUrl || 'https://i.pinimg.com/236x/a2/80/e2/a280e2a50bf6240f29b49a72875adee5.jpg'}" class="img-fluid rounded-circle mb-2 shadow-sm" alt="Foto Profil" style="width:120px;height:120px;object-fit:cover;">
-            <h5 class="mb-0">${user.fullname || 'Anonim'}</h5>
-            <p class="text-muted small mb-1">@${user.username}</p>
-            <span class="badge bg-${user.role === 'admin' ? 'danger' : 'primary'} rounded-pill">${user.role || 'user'}</span>
-          </div>
-          <div class="col-lg-9">
-            <h6 class="mb-3 text-primary"><i class="bi bi-info-circle-fill me-2"></i>Informasi Akun</h6>
-            <div class="row">
-              <div class="col-md-6 mb-3"><ul class="list-group list-group-flush">
-                  <li class="list-group-item d-flex justify-content-between align-items-center"><span><i class="bi bi-envelope me-2 text-muted"></i>Email</span><strong class="text-dark">${user.email || 'N/A'}</strong></li>
-                  <li class="list-group-item d-flex justify-content-between align-items-center"><span><i class="bi bi-phone me-2 text-muted"></i>No. HP</span><strong class="text-dark">${user.nomor || 'N/A'}</strong></li>
-                  <li class="list-group-item d-flex justify-content-between align-items-center"><span><i class="bi bi-wallet2 me-2 text-muted"></i>Saldo</span><strong class="text-success fw-bolder">${formatRupiah(user.saldo)}</strong></li>
-              </ul></div>
-              <div class="col-md-6 mb-3"><ul class="list-group list-group-flush">
-                  <li class="list-group-item d-flex justify-content-between align-items-center"><span><i class="bi bi-patch-check me-2 text-muted"></i>Verified</span><span class="badge text-bg-${user.isVerified ? 'success' : 'danger'}">${user.isVerified ? 'Ya' : 'Tidak'}</span></li>
-                  <li class="list-group-item d-flex justify-content-between align-items-center"><span><i class="bi bi-calendar-plus me-2 text-muted"></i>Daftar</span><small class="text-dark">${formatTanggalIndo(user.tanggalDaftar)}</small></li>
-                  <li class="list-group-item d-flex justify-content-between align-items-center"><span><i class="bi bi-clock me-2 text-muted"></i>Login Akhir</span><small class="text-dark">${formatTanggalIndo(user.lastLogin)}</small></li>
-              </ul></div>
-            </div>
-            <h6 class="mt-2 mb-1 text-primary"><i class="bi bi-key-fill me-2"></i>API Key</h6>
-            <p class="user-select-all bg-light p-2 rounded font-monospace small" style="word-break:break-all;">${user.apiKey || 'N/A'}</p>
-          </div>
-        </div>`;
-      modalBody.innerHTML = detailContent;
-    } else {
-      modalTitle.textContent = 'User Tidak Ditemukan';
-      modalBody.innerHTML = `<p class="text-danger text-center py-4">Detail user dengan ID ${userId} tidak dapat ditemukan.</p>`;
-    }
-  };
-
-  const verifyUser = async (username) => {
-    if (!confirm(`Apakah Anda yakin ingin memverifikasi pengguna: ${username}?`)) return;
-    try {
-      const response = await fetch('/admin/verify-user', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username: username })
-      });
-      const result = await response.json();
-      alert(result.message || (result.success ? `Pengguna ${username} berhasil diverifikasi.` : 'Gagal melakukan verifikasi.'));
-      if (result.success) await fetchDataAndInitialize();
-    } catch (e) {
-      alert('Terjadi kesalahan saat mencoba verifikasi pengguna.');
-    }
-  };
-  
   const loadGlobalHistory = (page = 1) => {
     globalHistoryCurrentPage = page;
     const tbody = document.getElementById('globalHistoryTableBody');
-    if (!tbody) return;
-
-    if (!allUsersData.length) {
-      tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-muted">Memuat riwayat transaksi...</td></tr>`;
-      return;
-    }
-    
-    const searchValue = document.getElementById('globalHistorySearchInput').value.toLowerCase();
-    const categoryValue = document.getElementById('globalHistoryCategoryFilter').value;
-
-    let flatHistory = [];
-    allUsersData.forEach(user => {
-        (user.historyDeposit || []).forEach(h => flatHistory.push({ ...h, userId: user._id, username: user.username, type: 'Deposit', amount: h.get_balance, date: h.created_at, ref: h.reff_id, details: h.metode }));
-        (user.historyOrder || []).forEach(h => flatHistory.push({ ...h, userId: user._id, username: user.username, type: 'Order', amount: h.price, date: h.created_at, ref: h.reff_id, details: h.layanan }));
-    });
-    flatHistory.sort((a, b) => new Date(b.date) - new Date(a.date));
-
-    const filteredHistory = flatHistory.filter(h => {
-        const matchCategory = !categoryValue || h.type === categoryValue;
-        const matchSearch = !searchValue || 
-            (h.details && h.details.toLowerCase().includes(searchValue)) ||
-            (h.username && h.username.toLowerCase().includes(searchValue)) ||
-            (h.ref && h.ref.toLowerCase().includes(searchValue)) ||
-            (h.target && String(h.target).toLowerCase().includes(searchValue));
-        return matchCategory && matchSearch;
-    });
-
-    const startIndex = (page - 1) * GLOBAL_HISTORY_ITEMS_PER_PAGE;
-    const paginatedHistory = filteredHistory.slice(startIndex, startIndex + GLOBAL_HISTORY_ITEMS_PER_PAGE);
-
     tbody.innerHTML = '';
+    const startIndex = (page - 1) * GLOBAL_HISTORY_ITEMS_PER_PAGE;
+    const paginatedHistory = flatHistoryCache.slice(startIndex, startIndex + GLOBAL_HISTORY_ITEMS_PER_PAGE);
+
     if (paginatedHistory.length === 0) {
-      tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-muted">Tidak ada riwayat yang cocok.</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-muted">Tidak ada riwayat transaksi.</td></tr>`;
     } else {
       paginatedHistory.forEach(h => {
         const statusBadge = h.status.toLowerCase() === 'success' ? 'success' : (h.status.toLowerCase().includes('fail') || h.status.toLowerCase().includes('error') ? 'danger' : 'warning');
         const tr = document.createElement('tr');
         tr.className = 'clickable-row';
-        tr.onclick = () => showTransactionDetail(h.userId, h.id, h.type);
+        tr.onclick = () => openTransactionModal(h.id, h.type);
         tr.innerHTML = `
-            <td>${formatTanggalIndo(h.date)}</td>
+            <td>${formatTanggalIndo(h.created_at)}</td>
             <td>${h.username}</td>
-            <td>${h.details || 'N/A'}</td>
-            <td>${formatRupiah(h.amount)}</td>
+            <td>${h.type === 'Order' ? h.layanan : h.metode}</td>
+            <td>${formatRupiah(h.type === 'Order' ? h.price : h.get_balance)}</td>
             <td><span class="badge text-bg-${statusBadge}">${h.status}</span></td>
-            <td><small class="text-muted">${h.ref || 'N/A'}</small></td>`;
+            <td><small class="text-muted">${h.reff_id || 'N/A'}</small></td>`;
         tbody.appendChild(tr);
       });
     }
-    renderPagination('globalHistoryPagination', filteredHistory.length, page, GLOBAL_HISTORY_ITEMS_PER_PAGE, loadGlobalHistory);
+    renderPagination('globalHistoryPagination', flatHistoryCache.length, page, GLOBAL_HISTORY_ITEMS_PER_PAGE, loadGlobalHistory);
   };
   
-  const showTransactionDetail = (userId, transactionId, type) => {
-    const user = allUsersData.find(u => u._id === userId);
-    if (!user) return;
+  const openTransactionModal = (transactionId, type) => {
+    const trx = flatHistoryCache.find(t => t.id === transactionId && t.type === type);
+    if (!trx) { alert('Transaksi tidak ditemukan.'); return; }
     
-    const historySource = type === 'Deposit' ? user.historyDeposit : user.historyOrder;
-    const trx = historySource.find(t => t.id === transactionId);
-    if (!trx) return;
+    const modalLabel = document.getElementById('transactionModalLabel');
+    const modalBody = document.getElementById('transactionModalBody');
+    const modalFooter = document.getElementById('transactionModalFooter');
 
-    const modalBody = document.getElementById('transactionDetailModalBody');
-    const modalTitle = document.getElementById('transactionDetailModalLabel');
-    modalTitle.textContent = `Detail ${type}: ${trx.reff_id || trx.id}`;
+    modalLabel.innerHTML = `<i class="bi bi-pencil-square me-2"></i>Edit Transaksi ${type}`;
+    
+    let detailsHtml = `<ul class="list-group list-group-flush mb-3">
+        <li class="list-group-item d-flex justify-content-between"><span>Username:</span><strong>${trx.username}</strong></li>
+        <li class="list-group-item d-flex justify-content-between"><span>ID Transaksi:</span><strong class="user-select-all">${trx.id}</strong></li>
+        <li class="list-group-item d-flex justify-content-between"><span>Reff ID:</span><strong class="user-select-all">${trx.reff_id || 'N/A'}</strong></li>
+    </ul>`;
 
-    let contentHtml = `<ul class="list-group list-group-flush">
-        <li class="list-group-item d-flex justify-content-between"><span>Username</span><strong>${user.username}</strong></li>
-        <li class="list-group-item d-flex justify-content-between"><span>ID Transaksi</span><strong class="user-select-all">${trx.id}</strong></li>
-        <li class="list-group-item d-flex justify-content-between"><span>Reff ID</span><strong class="user-select-all">${trx.reff_id || 'N/A'}</strong></li>
-        <li class="list-group-item d-flex justify-content-between"><span>Tanggal</span><strong>${formatTanggalIndo(trx.created_at)}</strong></li>
-        <li class="list-group-item d-flex justify-content-between"><span>Status</span><strong>${trx.status}</strong></li>
-    </ul><hr>`;
+    let formHtml = `<h6 class="text-primary">Form Perubahan</h6>`;
+    const statusOptions = ['Success', 'Pending', 'Processing', 'Failed', 'Error'];
+    let optionsHtml = statusOptions.map(s => `<option value="${s}" ${s.toLowerCase() === trx.status.toLowerCase() ? 'selected' : ''}>${s}</option>`).join('');
+    
+    formHtml += `
+        <div class="mb-3">
+            <label for="editStatus" class="form-label">Status</label>
+            <select id="editStatus" class="form-select">${optionsHtml}</select>
+        </div>
+    `;
 
-    if (type === 'Deposit') {
-        contentHtml += `
-        <h6 class="mt-3 mb-2">Detail Deposit</h6>
-        <ul class="list-group list-group-flush">
-            <li class="list-group-item d-flex justify-content-between"><span>Metode</span><strong>${trx.metode || 'N/A'}</strong></li>
-            <li class="list-group-item d-flex justify-content-between"><span>Bank</span><strong>${trx.bank || 'N/A'}</strong></li>
-            <li class="list-group-item d-flex justify-content-between"><span>Atas Nama</span><strong>${trx.atas_nama || 'N/A'}</strong></li>
-            <li class="list-group-item d-flex justify-content-between"><span>Tujuan</span><strong class="user-select-all">${trx.tujuan || 'N/A'}</strong></li>
-            <li class="list-group-item d-flex justify-content-between"><span>Nominal</span><strong>${formatRupiah(trx.nominal)}</strong></li>
-            <li class="list-group-item d-flex justify-content-between"><span>Biaya</span><strong>${formatRupiah(trx.fee)}</strong></li>
-            <li class="list-group-item d-flex justify-content-between"><span>Saldo Diterima</span><strong class="text-success fw-bold">${formatRupiah(trx.get_balance)}</strong></li>
-        </ul>`;
-        if (trx.qr_image) {
-            contentHtml += `<h6 class="mt-4 mb-2">QR Code</h6><div class="text-center"><img src="${trx.qr_image}" class="img-fluid rounded" style="max-width: 250px;" alt="QR Code"></div>`;
-        }
-    } else { // Order
-        contentHtml += `
-        <h6 class="mt-3 mb-2">Detail Order</h6>
-        <ul class="list-group list-group-flush">
-            <li class="list-group-item d-flex justify-content-between"><span>Layanan</span><strong>${trx.layanan || 'N/A'}</strong></li>
-            <li class="list-group-item d-flex justify-content-between"><span>Kode Layanan</span><strong>${trx.code || 'N/A'}</strong></li>
-            <li class="list-group-item d-flex justify-content-between"><span>Target</span><strong class="user-select-all">${trx.target || 'N/A'}</strong></li>
-            <li class="list-group-item d-flex justify-content-between"><span>Harga</span><strong class="text-danger fw-bold">${formatRupiah(trx.price)}</strong></li>
-            <li class="list-group-item">
-                <div class="d-flex justify-content-between"><span>SN / Catatan</span></div>
-                <div class="p-2 mt-1 bg-light rounded user-select-all"><pre class="mb-0" style="white-space: pre-wrap; word-break: break-all;">${trx.sn || 'N/A'}</pre></div>
-            </li>
-        </ul>`;
+    if (type === 'Order') {
+        formHtml += `
+            <div class="mb-3">
+                <label for="editSn" class="form-label">SN / Catatan</label>
+                <textarea id="editSn" class="form-control" rows="3">${trx.sn || ''}</textarea>
+            </div>
+        `;
     }
-    modalBody.innerHTML = contentHtml;
+
+    modalBody.innerHTML = detailsHtml + formHtml;
+    modalFooter.innerHTML = `
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+        <button type="button" class="btn btn-primary" onclick="saveTransactionChanges('${trx.userId}', '${trx.id}', '${trx.type}')">Simpan Perubahan</button>
+    `;
     
-    if (!transactionDetailModalInstance) transactionDetailModalInstance = new bootstrap.Modal(document.getElementById('transactionDetailModal'));
-    transactionDetailModalInstance.show();
+    if (!transactionModalInstance) transactionModalInstance = new bootstrap.Modal(document.getElementById('transactionModal'));
+    transactionModalInstance.show();
+  };
+  
+  const saveTransactionChanges = async (userId, transactionId, type) => {
+    const newStatus = document.getElementById('editStatus').value;
+    const newSnElement = document.getElementById('editSn');
+    const newSn = newSnElement ? newSnElement.value : undefined;
+    
+    const url = type === 'Deposit' ? '/admin/update-deposit-status' : '/admin/update-order-status';
+    const body = {
+        userId,
+        newStatus,
+        [type === 'Deposit' ? 'depositId' : 'orderId']: transactionId
+    };
+    if (newSn !== undefined) body.newSn = newSn;
+
+    try {
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(body)
+        });
+        const result = await response.json();
+        alert(result.message);
+        if (result.success) {
+            transactionModalInstance.hide();
+            await fetchDataAndInitialize();
+        }
+    } catch (error) {
+        alert('Gagal menghubungi server.');
+    }
   };
 
-  document.addEventListener('DOMContentLoaded', async () => {
-    await fetchDataAndInitialize();
+  const checkOrderStatus = async () => {
+    const id = document.getElementById('checkOrderIdInput').value;
+    if (!id.trim()) { alert('ID Transaksi tidak boleh kosong.'); return; }
+
+    const resultContainer = document.getElementById('checkOrderResultContainer');
+    const spinner = document.getElementById('checkOrderSpinner');
     
-    document.getElementById('globalHistorySearchInput')?.addEventListener('input', () => loadGlobalHistory(1));
-    document.getElementById('globalHistoryCategoryFilter')?.addEventListener('change', () => loadGlobalHistory(1));
-    document.getElementById('userSearchInput')?.addEventListener('input', () => loadUsersTable(1));
-    document.getElementById('userRoleFilter')?.addEventListener('change', () => loadUsersTable(1));
+    resultContainer.innerHTML = '';
+    spinner.classList.remove('d-none');
     
-    window.addEventListener('resize', () => {
-        if (depositChartInstance) depositChartInstance.resize();
-        if (orderChartInstance) orderChartInstance.resize();
-    });
-  });
+    try {
+        const response = await fetch(`/check-order?id=${encodeURIComponent(id)}`);
+        const result = await response.json();
+        
+        let contentHtml = '';
+        if (result.success) {
+            const d = result.detail;
+            const statusBadge = d.status.toLowerCase() === 'success' ? 'success' : (d.status.toLowerCase().includes('fail') ? 'danger' : 'warning');
+            contentHtml = `
+                <div class="card bg-light">
+                    <div class="card-body">
+                        <h5 class="card-title text-center mb-3">Hasil Pengecekan</h5>
+                        <ul class="list-group">
+                            <li class="list-group-item d-flex justify-content-between align-items-center">Status <span class="badge bg-${statusBadge} fs-6">${d.status}</span></li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">ID Transaksi <strong class="user-select-all">${d.id}</strong></li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">Reff ID <strong class="user-select-all">${d.reff_id}</strong></li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">Layanan <strong>${d.layanan}</strong></li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">Target <strong class="user-select-all">${d.target}</strong></li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">Harga <strong class="text-danger">${formatRupiah(d.harga)}</strong></li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">Waktu <strong >${formatTanggalIndo(d.waktu)}</strong></li>
+                            <li class="list-group-item">
+                                <div class="d-flex justify-content-between"><span>SN / Catatan</span></div>
+                                <pre class="p-2 mt-1 bg-white rounded">${d.sn || 'Tidak ada SN.'}</pre>
+                            </li>
+                        </ul>
+                    </div>
+                </div>`;
+        } else {
+            contentHtml = `<div class="alert alert-danger text-center">${result.message}</div>`;
+        }
+        resultContainer.innerHTML = contentHtml;
+    } catch (error) {
+        resultContainer.innerHTML = `<div class="alert alert-danger text-center">Terjadi kesalahan jaringan saat memeriksa status.</div>`;
+    } finally {
+        spinner.classList.add('d-none');
+    }
+  };
+  
+  const renderPagination = (containerId, totalItems, currentPage, itemsPerPage, callback) => {
+    const pc = document.getElementById(containerId);
+    pc.innerHTML = '';
+    const totalPages = Math.ceil(totalItems / itemsPerPage);
+    if (totalPages <= 1) return;
+    const ul = document.createElement('ul');
+    ul.className = 'pagination pagination-sm';
+    const createPageItem = (pageNum, text, isDisabled = false) => {
+        const li = document.createElement('li');
+        li.className = `page-item ${currentPage === pageNum ? 'active' : ''} ${isDisabled ? 'disabled' : ''}`;
+        const a = document.createElement('a'); a.className = 'page-link'; a.href = '#'; a.innerHTML = text;
+        if (!isDisabled) a.onclick = (e) => { e.preventDefault(); callback(pageNum); };
+        li.appendChild(a); return li;
+    };
+    ul.appendChild(createPageItem(currentPage - 1, '«', currentPage === 1));
+    for (let i = 1; i <= totalPages; i++) ul.appendChild(createPageItem(i, i));
+    ul.appendChild(createPageItem(currentPage + 1, '»', currentPage === totalPages));
+    pc.appendChild(ul);
+  };
+
+  document.addEventListener('DOMContentLoaded', fetchDataAndInitialize);
 </script>
 </body>
 </html>
