@@ -28,12 +28,16 @@ async function getAtlanticDepositMethods() {
     const formData = {
       api_key: process.env.ATLAN_API_KEY,
     };
+    const urlnyaa = `${BASE_URL}/deposit/metode`;
     const response = await axios.post(
-      `${BASE_URL}/deposit/metode`,
+      urlnyaa,
       qs.stringify(formData),
       {
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
+          'User-Agent': 'MyCustomUserAgent/1.0 (compatible; RerezzBot/2025)',
+            'Accept-Language': 'en-US,en;q=0.9',
+            'Referer': urlnyaa,
         },
       }
     );
@@ -457,13 +461,16 @@ router.post("/layanan/price-list", requireLogin, async (req, res) => {
       type: 'prabayar',
       code: code,
     };
-
+  const urlnya = `${BASE_URL}/layanan/price_list`
     const atlanticResponse = await axios.post(
-      `${BASE_URL}/layanan/price_list`,
+     urlnya,
       qs.stringify(formDataToAtlantic),
       {
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
+          'User-Agent': 'MyCustomUserAgent/1.0 (compatible; RerezzBot/2025)',
+            'Accept-Language': 'en-US,en;q=0.9',
+            'Referer': urlnya,
         },
       }
     );
@@ -528,12 +535,17 @@ router.get("/produk", requireLogin, async (req, res) => {
       type: "prabayar",
       code: "",
     };
-
+const urlnya = `${BASE_URL}/layanan/price_list`
     const atlanticResponse = await axios.post(
-      `${BASE_URL}/layanan/price_list`,
+      urlnya,
       qs.stringify(formDataToAtlantic),
       {
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        headers: { 
+          "Content-Type": "application/x-www-form-urlencoded",
+          'User-Agent': 'MyCustomUserAgent/1.0 (compatible; RerezzBot/2025)',
+            'Accept-Language': 'en-US,en;q=0.9',
+            'Referer': urlnya,
+        },
       }
     );
 
@@ -581,12 +593,17 @@ router.get("/produk-provider", requireLogin, async (req, res) => {
       type: "prabayar",
       code: "",
     };
-
+const urlnya = `${BASE_URL}/layanan/price_list`
     const atlanticResponse = await axios.post(
-      `${BASE_URL}/layanan/price_list`,
+      urlnya,
       qs.stringify(formDataToAtlantic),
       {
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        headers: { 
+          "Content-Type": "application/x-www-form-urlencoded",
+          'User-Agent': 'MyCustomUserAgent/1.0 (compatible; RerezzBot/2025)',
+            'Accept-Language': 'en-US,en;q=0.9',
+            'Referer': urlnya,
+        },
       }
     );
 
