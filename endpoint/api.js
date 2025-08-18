@@ -20,29 +20,7 @@ const {
 } = require("../index.js");
 
 
-async function getAtlanticDepositMethods() {
-  try {
-    const formData = {
-      api_key: process.env.ATLAN_API_KEY,
-    };
-    const response = await axios.post(
-      `${BASE_URL}/deposit/metode`,
-      qs.stringify(formData),
-      {
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-      }
-    );
-    if (response.data && response.data.status && Array.isArray(response.data.data)) {
-      return response.data.data;
-    }
-    return null;
-  } catch (error) {
-    console.error("Gagal mengambil metode deposit dari Atlantic:", error?.response?.data || error.message);
-    return null;
-  }
-}
+
 
 router.get("/profile", validateApiKey, async (req, res) => {
   try {
@@ -118,17 +96,19 @@ router.get("/deposit/metode", validateApiKey, async (req, res) => {
       api_key: process.env.ATLAN_API_KEY,
     };
 
-    const response = await axios.post(
+    const response = await cloudscraper.post(
       "https://atlantich2h.com/deposit/metode",
-      qs.stringify(formData),
       {
+        body: qs.stringify(formData),
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
+          "User-Agent":
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36",
         },
       }
     );
 
-    const result = response.data;
+    const result = JSON.parse(response);
 
     if (!result.status || !Array.isArray(result.data)) {
       return res.status(502).json({
@@ -142,7 +122,7 @@ router.get("/deposit/metode", validateApiKey, async (req, res) => {
     if (role === "user") tambahanPersen = 0.2;
     if (role === "reseller") tambahanPersen = 0.1;
 
-    const blacklist = ['OVO', 'QRIS', 'DANA', 'ovo', 'MANDIRI', 'PERMATA'];
+    const blacklist = ["OVO", "QRIS", "DANA", "ovo", "MANDIRI", "PERMATA"];
 
     const metodeFormatted = result.data
       .filter((item) => !blacklist.includes(item.metode?.toUpperCase()))
@@ -175,6 +155,7 @@ router.get("/deposit/metode", validateApiKey, async (req, res) => {
             : `${fullUrl}/media/metode/default.png`,
         };
       });
+
     return res.status(200).json({
       success: true,
       message: "Daftar metode deposit V-Pedia",
@@ -189,9 +170,8 @@ router.get("/deposit/metode", validateApiKey, async (req, res) => {
   }
 });
 
-
-
-
+const qs = require("querystring");
+const cloudscraper = require("cloudflare-scraper");
 
 router.get("/deposit/create", validateApiKey, async (req, res) => {
   const { user } = req;
@@ -211,17 +191,17 @@ router.get("/deposit/create", validateApiKey, async (req, res) => {
 
   if (metodePilihanPengguna) {
     try {
-      const metodeResponse = await axios.post(
-        `${BASE_URL}/deposit/metode`,
-        qs.stringify({ api_key: process.env.ATLAN_API_KEY }),
-        {
-          headers: {
-            "Content-Type": "application/x-www-form-urlencoded",
-          },
-        }
-      );
+      const metodeResponse = await cloudscraper.post(`${BASE_URL}/deposit/metode`, {
+        body: qs.stringify({ api_key: process.env.ATLAN_API_KEY }),
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+          "User-Agent":
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36",
+        },
+      });
 
-      const allMetode = metodeResponse.data?.data || [];
+      const parsedMetode = JSON.parse(metodeResponse);
+      const allMetode = parsedMetode?.data || [];
 
       const foundMetode = allMetode.find(
         (m) =>
@@ -265,17 +245,16 @@ router.get("/deposit/create", validateApiKey, async (req, res) => {
   };
 
   try {
-    const depositResponse = await axios.post(
-      `${BASE_URL}/deposit/create`,
-      qs.stringify(formData),
-      {
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-      }
-    );
+    const depositResponse = await cloudscraper.post(`${BASE_URL}/deposit/create`, {
+      body: qs.stringify(formData),
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+        "User-Agent":
+          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36",
+      },
+    });
 
-    const result = depositResponse.data;
+    const result = JSON.parse(depositResponse);
     if (!result?.status || !result?.data) {
       return res.status(502).json({
         success: false,
@@ -327,20 +306,19 @@ router.get("/deposit/create", validateApiKey, async (req, res) => {
 
     const intervalId = setInterval(async () => {
       try {
-        const statusRes = await axios.post(
-          `${BASE_URL}/deposit/status`,
-          qs.stringify({
+        const statusRes = await cloudscraper.post(`${BASE_URL}/deposit/status`, {
+          body: qs.stringify({
             api_key: process.env.ATLAN_API_KEY,
             id: d.id,
           }),
-          {
-            headers: {
-              "Content-Type": "application/x-www-form-urlencoded",
-            },
-          }
-        );
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+            "User-Agent":
+              "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36",
+          },
+        });
 
-        const statusData = statusRes.data;
+        const statusData = JSON.parse(statusRes);
         if (statusData?.status && statusData?.data) {
           const currStatus = statusData.data.status;
           const currBalance = parseInt(statusData.data.get_balance) || 0;
@@ -366,7 +344,10 @@ router.get("/deposit/create", validateApiKey, async (req, res) => {
           }
         }
       } catch (pollErr) {
-        console.error(`Gagal polling status deposit ID ${d.id}:`, pollErr.response?.data || pollErr.message);
+        console.error(
+          `Gagal polling status deposit ID ${d.id}:`,
+          pollErr.response?.data || pollErr.message
+        );
       }
     }, 1000);
   } catch (error) {
@@ -383,12 +364,14 @@ router.get("/deposit/create", validateApiKey, async (req, res) => {
 router.get("/deposit/status", validateApiKey, async (req, res) => {
   const { user } = req;
   const { id } = req.query;
+
   if (!id) {
     return res.status(400).json({
       success: false,
       message: "ID deposit harus diisi.",
     });
   }
+
   try {
     const userHistory = await User.findOne(
       { _id: user._id, "historyDeposit.id": id },
@@ -401,35 +384,44 @@ router.get("/deposit/status", validateApiKey, async (req, res) => {
         message: "ID deposit tidak ditemukan dalam riwayat Anda.",
       });
     }
+
     const formDataToAtlantic = {
       api_key: process.env.ATLAN_API_KEY,
       id,
     };
-    const atlanticResponse = await axios.post(
-      `${BASE_URL}/deposit/status`,
-      qs.stringify(formDataToAtlantic),
-      {
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-      }
-    );
-    const resultFromAtlantic = atlanticResponse.data;
+
+    const atlanticResponse = await cloudscraper.post(`${BASE_URL}/deposit/status`, {
+      body: qs.stringify(formDataToAtlantic),
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+        "User-Agent":
+          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36",
+      },
+    });
+
+    const resultFromAtlantic = JSON.parse(atlanticResponse);
+
     if (!resultFromAtlantic || !resultFromAtlantic.status || !resultFromAtlantic.data) {
       return res.status(502).json({
         success: false,
-        message: resultFromAtlantic?.data?.message || resultFromAtlantic?.message || "Gagal memeriksa status deposit ke provider.",
+        message:
+          resultFromAtlantic?.data?.message ||
+          resultFromAtlantic?.message ||
+          "Gagal memeriksa status deposit ke provider.",
         error: resultFromAtlantic?.data || resultFromAtlantic,
       });
     }
+
     const depositDetails = resultFromAtlantic.data;
     const originalGetBalance = parseInt(depositDetails.get_balance) || 0;
+
     let finalBalance = originalGetBalance;
     if (user.role === "user") {
       finalBalance = Math.floor(originalGetBalance * 0.998); // Kurangi 0.2% untuk user
     } else if (user.role === "reseller") {
       finalBalance = Math.floor(originalGetBalance * 0.999); // Kurangi 0.1% untuk reseller
     }
+
     const responseData = {
       id: depositDetails.id,
       reff_id: depositDetails.reff_id,
@@ -441,6 +433,7 @@ router.get("/deposit/status", validateApiKey, async (req, res) => {
       status: depositDetails.status,
       created_at: depositDetails.created_at,
     };
+
     return res.status(200).json({
       success: true,
       data: responseData,
@@ -449,7 +442,10 @@ router.get("/deposit/status", validateApiKey, async (req, res) => {
     const apiError = error.response?.data;
     return res.status(500).json({
       success: false,
-      message: apiError?.data?.message || apiError?.message || "Terjadi kesalahan internal saat memeriksa status deposit.",
+      message:
+        apiError?.data?.message ||
+        apiError?.message ||
+        "Terjadi kesalahan internal saat memeriksa status deposit.",
       error: apiError || error.message,
     });
   }
@@ -458,44 +454,54 @@ router.get("/deposit/status", validateApiKey, async (req, res) => {
 router.get("/deposit/cancel", validateApiKey, async (req, res) => {
   const { user } = req;
   const { id } = req.query;
+
   if (!id) {
     return res.status(400).json({
       success: false,
       message: "ID deposit harus diisi.",
     });
   }
+
   try {
     const userHistory = await User.findOne(
       { _id: user._id, "historyDeposit.id": id },
       { "historyDeposit.$": 1 }
     );
+
     if (!userHistory || userHistory.historyDeposit.length === 0) {
       return res.status(404).json({
         success: false,
         message: "ID deposit tidak ditemukan dalam riwayat Anda.",
       });
     }
+
     const formDataToAtlantic = {
       api_key: process.env.ATLAN_API_KEY,
       id,
     };
-    const atlanticResponse = await axios.post(
-      `${BASE_URL}/deposit/cancel`,
-      qs.stringify(formDataToAtlantic),
-      {
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-      }
-    );
-    const resultFromAtlantic = atlanticResponse.data;
+
+    const atlanticResponse = await cloudscraper.post(`${BASE_URL}/deposit/cancel`, {
+      body: qs.stringify(formDataToAtlantic),
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+        "User-Agent":
+          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36",
+      },
+    });
+
+    const resultFromAtlantic = JSON.parse(atlanticResponse);
+
     if (!resultFromAtlantic || !resultFromAtlantic.status || !resultFromAtlantic.data) {
       return res.status(502).json({
         success: false,
-        message: resultFromAtlantic?.data?.message || resultFromAtlantic?.message || "Gagal membatalkan deposit.",
+        message:
+          resultFromAtlantic?.data?.message ||
+          resultFromAtlantic?.message ||
+          "Gagal membatalkan deposit.",
         error: resultFromAtlantic?.data || resultFromAtlantic,
       });
     }
+
     const cancelDetails = resultFromAtlantic.data;
     return res.status(200).json({
       success: true,
@@ -509,7 +515,10 @@ router.get("/deposit/cancel", validateApiKey, async (req, res) => {
     const apiError = error.response?.data;
     return res.status(500).json({
       success: false,
-      message: apiError?.data?.message || apiError?.message || "Terjadi kesalahan internal saat membatalkan deposit.",
+      message:
+        apiError?.data?.message ||
+        apiError?.message ||
+        "Terjadi kesalahan internal saat membatalkan deposit.",
       error: apiError || error.message,
     });
   }
