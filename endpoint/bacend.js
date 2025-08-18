@@ -2,6 +2,7 @@ const express = require("express");
 const axios = require("axios");
 const qs = require("qs");
 const multer = require('multer');
+const cloudscraper = require("cloudscraper");
 const upload = multer();
 const app = express();
 const router = express.Router();
@@ -141,17 +142,18 @@ router.post("/deposit/create", requireLogin, async (req, res) => {
 
   if (metodePilihanPengguna) {
     try {
-      const metodeResponse = await axios.post(
+      const metodeResponse = await cloudscraper.post(
         `${BASE_URL}/deposit/metode`,
-        qs.stringify({ api_key: process.env.ATLAN_API_KEY }),
         {
+          body: qs.stringify({ api_key: process.env.ATLAN_API_KEY }),
           headers: {
             "Content-Type": "application/x-www-form-urlencoded",
-          },
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"
+          }
         }
       );
 
-      const allMetode = metodeResponse.data?.data || [];
+      const allMetode = JSON.parse(metodeResponse).data || [];
 
       const foundMetode = allMetode.find(
         (m) =>
@@ -195,17 +197,18 @@ router.post("/deposit/create", requireLogin, async (req, res) => {
   };
 
   try {
-    const atlanticResponse = await axios.post(
+    const atlanticResponse = await cloudscraper.post(
       `${BASE_URL}/deposit/create`,
-      qs.stringify(formDataToAtlantic),
       {
+        body: qs.stringify(formDataToAtlantic),
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
-        },
+          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"
+        }
       }
     );
 
-    const resultFromAtlantic = atlanticResponse.data;
+    const resultFromAtlantic = JSON.parse(atlanticResponse);
     if (!resultFromAtlantic || !resultFromAtlantic.status || !resultFromAtlantic.data) {
       return res.status(502).json({
         success: false,
@@ -257,20 +260,21 @@ router.post("/deposit/create", requireLogin, async (req, res) => {
 
     const intervalId = setInterval(async () => {
       try {
-        const checkStatusResponse = await axios.post(
+        const checkStatusResponse = await cloudscraper.post(
           `${BASE_URL}/deposit/status`,
-          qs.stringify({
-            api_key: process.env.ATLAN_API_KEY,
-            id: depositDetails.id,
-          }),
           {
+            body: qs.stringify({
+              api_key: process.env.ATLAN_API_KEY,
+              id: depositDetails.id,
+            }),
             headers: {
               "Content-Type": "application/x-www-form-urlencoded",
-            },
+              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"
+            }
           }
         );
 
-        const statusUpdateData = checkStatusResponse.data;
+        const statusUpdateData = JSON.parse(checkStatusResponse);
         if (statusUpdateData && statusUpdateData.status && statusUpdateData.data) {
           const currentTxStatus = statusUpdateData.data.status;
           const currentTxGetBalance = parseInt(statusUpdateData.data.get_balance) || 0;
@@ -305,6 +309,7 @@ router.post("/deposit/create", requireLogin, async (req, res) => {
     });
   }
 });
+
 
 
 router.post("/deposit/status", requireLogin, async (req, res) => {
