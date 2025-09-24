@@ -1,5 +1,6 @@
 const express = require("express");
 const axios = require("axios");
+const cloudscraper = require("cloudscraper")
 const qs = require("qs");
 const app = express();
 const router = express.Router();
@@ -24,18 +25,15 @@ const {
 
 router.get("/profile", async (req, res) => {
   try {
-    const response = await axios.post(
-      "https://atlantich2h.com/get_profile",
-      qs.stringify({ api_key: process.env.ATLAN_API_KEY }), 
-      {
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-      }
-    );
-
-    const extData = response.data;
-
+    const body = qs.stringify({ api_key: process.env.ATLAN_API_KEY })
+    const response = await cloudscraper.post("https://atlantich2h.com/get_profile", {
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
+      },
+      body
+    })
+    const extData = JSON.parse(response)
     const result = {
       success: extData.status === "true",
       info: extData.message,
@@ -45,22 +43,18 @@ router.get("/profile", async (req, res) => {
         email: extData.data?.email,
         hp: extData.data?.phone,
         saldo: extData.data?.balance,
-        status: extData.data?.status,
-      },
-    };
-
-    return res.json(result);
+        status: extData.data?.status
+      }
+    }
+    return res.json(result)
   } catch (error) {
-    console.error(error.response?.data || error.message);
     return res.status(500).json({
       success: false,
       message: "Gagal mengambil data dari API eksternal",
-      error: error.response?.data || error.message,
-    });
+      error: error.message
+    })
   }
-});
-
-
+})
 
 router.get("/data/users", requireAdmin, async (req, res) => {
   try {
