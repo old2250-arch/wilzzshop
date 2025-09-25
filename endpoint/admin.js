@@ -25,39 +25,29 @@ const {
 
 router.get("/profile", async (req, res) => {
   try {
-    const response = await cloudscraper.post("https://atlantich2h.com/get_profile", {
-      formData: {
-        api_key: process.env.ATLAN_API_KEY
-      },
+    const response = await cloudscraper({
+      method: "POST",
+      url: "https://atlantich2h.com/get_profile",
+      form: { api_key: process.env.ATLAN_API_KEY },
       headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
         "Referer": "https://atlantich2h.com/"
       },
-      gzip: true,
-      simple: true,
-      resolveWithFullResponse: false
+      jar: true,   // simpan cookie
+      simple: true
     });
 
     const extData = JSON.parse(response);
-
     return res.json({
       success: extData.status === "true",
-      info: extData.message,
-      profile: {
-        nama: extData.data?.name,
-        user: extData.data?.username,
-        email: extData.data?.email,
-        hp: extData.data?.phone,
-        saldo: extData.data?.balance,
-        status: extData.data?.status
-      }
+      message: extData.message,
+      profile: extData.data || null
     });
   } catch (error) {
-    console.error("❌ Error ambil profile:", error.message);
+    console.error("❌ Gagal ambil profile:", error.message);
     return res.status(500).json({
       success: false,
-      message: "Gagal mengambil data dari API eksternal",
+      message: "Masih ke-block Cloudflare",
       error: error.message
     });
   }
