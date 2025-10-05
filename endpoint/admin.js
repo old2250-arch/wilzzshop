@@ -26,7 +26,7 @@ const {
 router.get("/profile", async (req, res) => {
   try {
     const formData = {
-      api_key: process.env.ATLAN_API_KEY, // ambil dari .env
+      api_key: process.env.ATLAN_API_KEY,
     };
 
     const headers = {
@@ -45,29 +45,53 @@ router.get("/profile", async (req, res) => {
 
     const result = JSON.parse(response);
 
-    if (!result || result.status !== "true") {
-      return res.status(400).json({
-        success: false,
-        message: result?.message || "Gagal mengambil data profil",
+    // ✅ jika API status true → kirim ulang sama persis
+    if (result && result.status === "true") {
+      return res.status(200).json({
+        status: "true",
+        message: result.message || "Data retrieved successfully",
+        data: {
+          name: result.data?.name || "",
+          username: result.data?.username || "",
+          email: result.data?.email || "",
+          phone: result.data?.phone || "",
+          balance: result.data?.balance || "0",
+          status: result.data?.status || "",
+        },
       });
     }
 
-    // ✅ kirim data hasil API ke client
+    // ❌ jika status bukan true → balikin template kosong
     return res.status(200).json({
-      success: true,
-      message: "Berhasil mengambil data profil",
-      data: result.data,
+      status: "false",
+      message: "Failed to retrieve data",
+      data: {
+        name: "0",
+        username: "0",
+        email: "0",
+        phone: "0",
+        balance: "0",
+        status: "0",
+      },
     });
   } catch (error) {
     console.error("Error get_profile:", error?.message);
-    return res.status(500).json({
-      success: false,
-      message: "Terjadi kesalahan internal saat mengambil profil",
-      error: error?.message,
+
+    // ❌ jika error apa pun → tetap balikin format sama
+    return res.status(200).json({
+      status: "false",
+      message: "Error fetching profile",
+      data: {
+        name: "0",
+        username: "0",
+        email: "0",
+        phone: "0",
+        balance: "0",
+        status: "0",
+      },
     });
   }
 });
-
 router.get("/data/users", requireAdmin, async (req, res) => {
   try {
     const users = await User.find({}, "-password -__v");
