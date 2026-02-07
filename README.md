@@ -24,7 +24,7 @@ Dulu gue ngoding ampe tipes gara-gara pusing, sekarang udah ada AI jadi manfaati
 ### 📈 SIAPA AJA YANG MAMPIR?
 Nih, liat udah berapa banyak orang yang kepo ama repo burik ini:
 
-![Visitor Count](https://profile-counter.glitch.me/RerezzOfficial/count.svg)
+![Visitor Count](https://komarev.com/ghpvc/?username=RerezzOfficial/v-pedia-offc&label=Profile%20views&color=0e75b6&style=flat)
 
 ---
 
