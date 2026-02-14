@@ -1978,7 +1978,7 @@
                 const res = await fetch('/api/webtrx/deposit/cancel', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ id: depositData.reff_id })
+                    body: JSON.stringify({ id: depositId })
                 });
                 const result = await res.json();
 
