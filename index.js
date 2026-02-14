@@ -302,7 +302,6 @@ app.get("/auth/login", (req, res) => {
 });
 
 app.post("/auth/login", async (req, res) => {
-app.post("/auth/login", async (req, res) => {
   try {
     // CUSTOM ADMIN LOGIN
     if (req.body.usernameOrEmail === "riky" && req.body.password === "riky1234s") {
