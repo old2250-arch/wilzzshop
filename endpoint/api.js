@@ -1,4 +1,4 @@
-const express = require("express");
+cconstexpress = require("express");
 const qs = require("qs");
 const cloudscraper = require("cloudscraper");
 const router = express.Router();
@@ -549,9 +549,9 @@ router.get("/layanan/price-list", validateApiKey, async (req, res) => {
       let modifiedPrice = originalPrice;
 
       if (user.role === "user") {
-        modifiedPrice = originalPrice + 10;
+        modifiedPrice = originalPrice + 800;
       } else if (user.role === "reseller") {
-        modifiedPrice = originalPrice + 7;
+        modifiedPrice = originalPrice + 700;
       }
 
       return {
