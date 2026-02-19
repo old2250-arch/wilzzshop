@@ -128,7 +128,7 @@ router.get("/deposit/metode", validateApiKey, async (req, res) => {
           BNI: "/media/metode/bni.png",
           SHOPEEPAY: "/media/metode/shopeepay.png",
           LINKAJA: "/media/metode/linkaja.png",
-          QRISFAST: "/media/metode/qrisfast.png",
+          QRIS: "/media/metode/qrisfast.png",
         };
         const fullUrl = `${req.protocol}://${req.get("host")}`;
 
@@ -181,7 +181,7 @@ router.get("/deposit/create", validateApiKey, async (req, res) => {
   }
 
   const parsedNominal = parseInt(nominal);
-  let selectedMetodeCode = "QRISFAST";
+  let selectedMetodeCode = "QRIS";
   let selectedMetodeType = "ewallet";
   let minDepositForMetode = 500;
 
