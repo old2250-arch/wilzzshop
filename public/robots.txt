@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://wilzzshop.orderhostid.my.id/sitemap.xml
