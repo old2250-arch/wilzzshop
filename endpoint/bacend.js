@@ -1,12 +1,9 @@
 const express = require("express");
 const qs = require("qs");
-const multer = require('multer');
 const cloudscraper = require("cloudscraper");
 const axios = require("axios");
-const upload = multer();
 const router = express.Router();
 
-// Middleware
 router.use(express.urlencoded({ extended: true }));
 router.use(express.json());
 
@@ -20,7 +17,7 @@ const {
   editHistoryDeposit,
 } = require("../index.js");
 
-// Rumah OTP Configuration dengan API Key Anda
+// Rumah OTP Configuration
 const RUMAHOTP_API_KEY = "otp_jnswrQmLTYXkjWbU";
 const RUMAHOTP_BASE_URL = "https://www.rumahotp.com/api/v2";
 
@@ -38,21 +35,15 @@ const axiosHeaders = {
 // Helper function untuk create deposit Rumah OTP
 async function createRumahOtpDeposit(nominal) {
   try {
-    console.log("📍 Creating Rumah OTP deposit with amount:", nominal);
     const response = await axios({
       method: 'GET',
       url: `${RUMAHOTP_BASE_URL}/deposit/create?amount=${nominal}&payment_id=qris`,
       headers: axiosHeaders,
       timeout: 30000
     });
-    console.log("✅ Rumah OTP response:", response.data);
     return response.data;
   } catch (error) {
-    console.error("❌ Rumah OTP Create Error:", {
-      message: error.message,
-      response: error.response?.data,
-      status: error.response?.status
-    });
+    console.error("Rumah OTP Create Error:", error.message);
     throw error;
   }
 }
@@ -60,20 +51,15 @@ async function createRumahOtpDeposit(nominal) {
 // Helper function untuk cek status Rumah OTP
 async function checkRumahOtpStatus(depositId) {
   try {
-    console.log("📍 Checking Rumah OTP status for:", depositId);
     const response = await axios({
       method: 'GET',
       url: `${RUMAHOTP_BASE_URL}/deposit/get_status?deposit_id=${depositId}`,
       headers: axiosHeaders,
       timeout: 30000
     });
-    console.log("✅ Status check response:", response.data);
     return response.data;
   } catch (error) {
-    console.error("❌ Rumah OTP Status Error:", {
-      message: error.message,
-      response: error.response?.data
-    });
+    console.error("Rumah OTP Status Error:", error.message);
     throw error;
   }
 }
@@ -81,20 +67,15 @@ async function checkRumahOtpStatus(depositId) {
 // Helper function untuk cancel Rumah OTP
 async function cancelRumahOtpDeposit(depositId) {
   try {
-    console.log("📍 Cancelling Rumah OTP deposit:", depositId);
     const response = await axios({
       method: 'GET',
       url: `https://www.rumahotp.com/api/v1/deposit/cancel?deposit_id=${depositId}`,
       headers: axiosHeaders,
       timeout: 30000
     });
-    console.log("✅ Cancel response:", response.data);
     return response.data;
   } catch (error) {
-    console.error("❌ Rumah OTP Cancel Error:", {
-      message: error.message,
-      response: error.response?.data
-    });
+    console.error("Rumah OTP Cancel Error:", error.message);
     throw error;
   }
 }
@@ -102,9 +83,7 @@ async function cancelRumahOtpDeposit(depositId) {
 // Get Atlantic deposit methods
 async function getAtlanticDepositMethods() {
   try {
-    const formData = {
-      api_key: ATLAN_API_KEY,
-    };
+    const formData = { api_key: ATLAN_API_KEY };
     const response = await cloudscraper.post(`${BASE_URL}/deposit/metode`, {
       body: qs.stringify(formData),
       headers: cloudscraperHeaders,
@@ -147,19 +126,19 @@ router.post("/deposit/metode", requireLogin, async (req, res) => {
         };
       });
 
-    // Add WilzzShop QRIS (using Rumah OTP)
+    // TAMBAHKAN QRIS RUMAH OTP dengan nama yang sama seperti di frontend
     const fullUrl = `${req.protocol}://${req.get("host")}`;
     metodeFormatted.push({
-      metode: "WILZZSHOP-QRIS",
+      metode: "QRIS-RUMAHOTP", // INI YANG PENTING: kode metode
       type: "qris",
-      name: "Qris WilzzShop",
+      name: "QRIS (Rumah OTP)", // Nama yang ditampilkan
       min: 1000,
       max: 5000000,
       fee: "0",
       fee_persen: "0",
       status: "aktif",
       img_url: `${fullUrl}/media/metode/qris.png`,
-      provider: "wilzzshop"
+      provider: "rumahotp"
     });
 
     return res.status(200).json({
@@ -200,10 +179,10 @@ router.post("/deposit/create", requireLogin, async (req, res) => {
 
   const parsedNominal = parseInt(nominal);
 
-  // WILZZSHOP QRIS (Rumah OTP)
-  if (metode === "WILZZSHOP-QRIS") {
+  // CEK UNTUK QRIS RUMAH OTP
+  if (metode === "QRIS-RUMAHOTP") {
     try {
-      console.log("🟢 Processing WilzzShop QRIS deposit...");
+      console.log("🟢 Processing QRIS Rumah OTP deposit...");
       
       // Create deposit with Rumah OTP
       const rumahOtpResult = await createRumahOtpDeposit(parsedNominal);
@@ -218,14 +197,14 @@ router.post("/deposit/create", requireLogin, async (req, res) => {
       const deposit = rumahOtpResult.data;
       console.log("✅ Deposit created:", deposit.id);
 
-      // Calculate final balance (dipotong fee)
+      // Calculate final balance
       const originalAmount = parseFloat(deposit.currency?.diterima) || parsedNominal;
       let finalBalance = Math.floor(originalAmount);
       
       if (user.role === "user") {
-        finalBalance = Math.floor(originalAmount * 0.998); // Potongan 0.2%
+        finalBalance = Math.floor(originalAmount * 0.998);
       } else if (user.role === "reseller") {
-        finalBalance = Math.floor(originalAmount * 0.999); // Potongan 0.1%
+        finalBalance = Math.floor(originalAmount * 0.999);
       }
 
       // Save to history
@@ -236,7 +215,7 @@ router.post("/deposit/create", requireLogin, async (req, res) => {
         tambahan: 0,
         fee: originalAmount - finalBalance,
         get_balance: finalBalance,
-        metode: "Qris WilzzShop",
+        metode: "QRIS (Rumah OTP)",
         bank: null,
         tujuan: deposit.qr_string,
         atas_nama: null,
@@ -244,7 +223,7 @@ router.post("/deposit/create", requireLogin, async (req, res) => {
         qr_image: deposit.qr_image,
         created_at: new Date(),
         expired_at: deposit.expired_at ? new Date(deposit.expired_at) : null,
-        provider: "wilzzshop"
+        provider: "rumahotp"
       };
 
       await tambahHistoryDeposit(user._id, historyData);
@@ -259,23 +238,22 @@ router.post("/deposit/create", requireLogin, async (req, res) => {
           nominal: parsedNominal,
           fee: originalAmount - finalBalance,
           get_balance: finalBalance,
-          metode: "Qris WilzzShop",
+          metode: "QRIS (Rumah OTP)",
           status: "pending",
           qr_image: deposit.qr_image,
           qr_string: deposit.qr_string,
           tujuan: deposit.qr_string,
           created_at: deposit.created_at,
           expired_at: deposit.expired_at,
-          provider: "wilzzshop"
+          provider: "rumahotp"
         }
       });
 
     } catch (error) {
-      console.error("❌ Error creating WilzzShop deposit:", error);
+      console.error("❌ Error creating QRIS deposit:", error);
       return res.status(500).json({
         success: false,
-        message: "Terjadi kesalahan saat membuat deposit QRIS",
-        error: error.response?.data?.message || error.message
+        message: "Terjadi kesalahan saat membuat deposit QRIS"
       });
     }
   }
@@ -381,8 +359,7 @@ router.post("/deposit/create", requireLogin, async (req, res) => {
       console.error("❌ Error creating Atlantic deposit:", error);
       return res.status(500).json({
         success: false,
-        message: "Terjadi kesalahan internal",
-        error: error.response?.data || error.message
+        message: "Terjadi kesalahan internal"
       });
     }
   }
@@ -425,61 +402,83 @@ router.post("/deposit/status", requireLogin, async (req, res) => {
     }
 
     const deposit = userHistory.historyDeposit[0];
-    console.log("📋 Deposit record:", { id: deposit.id, provider: deposit.provider, status: deposit.status });
+    console.log("📋 Deposit record:", { 
+      id: deposit.id, 
+      provider: deposit.provider, 
+      status: deposit.status 
+    });
 
-    // CEK STATUS WILZZSHOP QRIS (Rumah OTP)
-    if (deposit.provider === "wilzzshop") {
+    // CEK STATUS RUMAH OTP
+    if (deposit.provider === "rumahotp") {
       try {
-        const statusResult = await checkRumahOtpStatus(id);
+        console.log("🟢 Checking Rumah OTP status...");
         
-        if (!statusResult?.success) {
-          // If API fails, return last known status from DB
+        const response = await axios({
+          method: 'GET',
+          url: `https://www.rumahotp.com/api/v2/deposit/get_status?deposit_id=${id}`,
+          headers: axiosHeaders,
+          timeout: 10000,
+          validateStatus: function (status) {
+            return status >= 200 && status < 500;
+          }
+        });
+
+        console.log("✅ Raw response:", response.data);
+
+        // Jika response sukses
+        if (response.data && response.data.success === true && response.data.data) {
+          const statusData = response.data.data;
+
+          // Update status jika berubah
+          if (statusData.status && statusData.status !== deposit.status) {
+            await editHistoryDeposit(user._id, id, statusData.status);
+            
+            if (statusData.status === "success") {
+              await User.findByIdAndUpdate(user._id, {
+                $inc: { saldo: deposit.get_balance || 0 }
+              });
+            }
+          }
+
           return res.status(200).json({
             success: true,
             data: {
-              id: deposit.id,
-              status: deposit.status || "pending",
-              message: "Menggunakan status terakhir"
+              id: statusData.id || deposit.id,
+              status: statusData.status || deposit.status,
+              nominal: deposit.nominal,
+              get_balance: deposit.get_balance,
+              created_at: statusData.created_at || deposit.created_at,
+              expired_at: statusData.expired_at || deposit.expired_at
             }
           });
         }
 
-        const statusData = statusResult.data;
-        console.log("✅ Status from Rumah OTP:", statusData.status);
-
-        // Update status if changed
-        if (statusData.status !== deposit.status) {
-          await editHistoryDeposit(user._id, id, statusData.status);
-          
-          // If success, add balance
-          if (statusData.status === "success") {
-            await User.findByIdAndUpdate(user._id, {
-              $inc: { saldo: deposit.get_balance || 0 }
-            });
-          }
-        }
-
-        return res.status(200).json({
-          success: true,
-          data: {
-            id: statusData.id || deposit.id,
-            status: statusData.status || deposit.status,
-            nominal: deposit.nominal,
-            get_balance: deposit.get_balance,
-            created_at: statusData.created_at || deposit.created_at,
-            expired_at: statusData.expired_at || deposit.expired_at
-          }
-        });
-
-      } catch (error) {
-        console.error("Error checking WilzzShop status:", error);
-        // Return last known status from DB if API fails
+        // Jika response error, return status dari DB
         return res.status(200).json({
           success: true,
           data: {
             id: deposit.id,
             status: deposit.status || "pending",
-            message: "Gagal cek ke server, menggunakan status terakhir"
+            nominal: deposit.nominal,
+            get_balance: deposit.get_balance,
+            created_at: deposit.created_at,
+            expired_at: deposit.expired_at
+          }
+        });
+
+      } catch (error) {
+        console.error("❌ Error checking Rumah OTP status:", error.message);
+        
+        // Return status dari database
+        return res.status(200).json({
+          success: true,
+          data: {
+            id: deposit.id,
+            status: deposit.status || "pending",
+            nominal: deposit.nominal,
+            get_balance: deposit.get_balance,
+            created_at: deposit.created_at,
+            expired_at: deposit.expired_at
           }
         });
       }
@@ -488,11 +487,7 @@ router.post("/deposit/status", requireLogin, async (req, res) => {
     // CEK STATUS ATLANTIC
     else {
       try {
-        const formData = {
-          api_key: ATLAN_API_KEY,
-          id: deposit.id
-        };
-
+        const formData = { api_key: ATLAN_API_KEY, id: deposit.id };
         const response = await cloudscraper.post(`${BASE_URL}/deposit/status`, {
           body: qs.stringify(formData),
           headers: cloudscraperHeaders,
@@ -501,31 +496,23 @@ router.post("/deposit/status", requireLogin, async (req, res) => {
 
         const result = JSON.parse(response);
         
-        if (!result?.status || !result?.data) {
+        if (result?.status && result?.data) {
           return res.status(200).json({
             success: true,
-            data: {
-              id: deposit.id,
-              status: deposit.status,
-              message: "Gagal update dari server"
-            }
+            data: result.data
           });
-        }
-
-        const statusData = result.data;
-
-        // Update if status changed
-        if (statusData.status !== deposit.status) {
-          await editHistoryDeposit(user._id, id, statusData.status);
         }
 
         return res.status(200).json({
           success: true,
-          data: statusData
+          data: {
+            id: deposit.id,
+            status: deposit.status
+          }
         });
 
       } catch (error) {
-        console.error("Error checking Atlantic status:", error);
+        console.error("❌ Error checking Atlantic status:", error);
         return res.status(200).json({
           success: true,
           data: {
@@ -537,10 +524,13 @@ router.post("/deposit/status", requireLogin, async (req, res) => {
     }
 
   } catch (error) {
-    console.error("❌ Error in /deposit/status:", error);
-    return res.status(500).json({
-      success: false,
-      message: "Terjadi kesalahan internal"
+    console.error("❌ Fatal error:", error);
+    return res.status(200).json({
+      success: true,
+      data: {
+        id: req.body.id || "unknown",
+        status: "pending"
+      }
     });
   }
 });
@@ -583,13 +573,12 @@ router.post("/deposit/cancel", requireLogin, async (req, res) => {
 
     const deposit = userHistory.historyDeposit[0];
 
-    // CANCEL WILZZSHOP QRIS (Rumah OTP)
-    if (deposit.provider === "wilzzshop") {
+    // CANCEL RUMAH OTP
+    if (deposit.provider === "rumahotp") {
       try {
-        // Cek dulu status terbaru
+        // Cek status dulu
         const statusCheck = await checkRumahOtpStatus(id);
         
-        // If already success, cannot cancel
         if (statusCheck?.success && statusCheck.data?.status === "success") {
           return res.status(400).json({
             success: false,
@@ -597,47 +586,10 @@ router.post("/deposit/cancel", requireLogin, async (req, res) => {
           });
         }
 
-        // If already expired or cancelled
-        if (statusCheck?.success && ["expired", "cancel"].includes(statusCheck.data?.status)) {
-          return res.status(400).json({
-            success: false,
-            message: `Deposit sudah ${statusCheck.data.status}`
-          });
-        }
-
-        // Try to cancel
+        // Cancel
         const cancelResult = await cancelRumahOtpDeposit(id);
         
-        if (cancelResult?.success) {
-          // Update status in DB
-          await editHistoryDeposit(user._id, id, "cancel");
-          
-          return res.status(200).json({
-            success: true,
-            data: {
-              id: id,
-              status: "cancel",
-              message: "Deposit berhasil dibatalkan"
-            }
-          });
-        } else {
-          // If cancel fails, just update status in DB
-          await editHistoryDeposit(user._id, id, "cancel");
-          
-          return res.status(200).json({
-            success: true,
-            data: {
-              id: id,
-              status: "cancel",
-              message: "Deposit dibatalkan (lokal)"
-            }
-          });
-        }
-
-      } catch (error) {
-        console.error("Error cancelling WilzzShop deposit:", error);
-        
-        // If API fails, still mark as cancelled in DB
+        // Update status di DB
         await editHistoryDeposit(user._id, id, "cancel");
         
         return res.status(200).json({
@@ -645,52 +597,14 @@ router.post("/deposit/cancel", requireLogin, async (req, res) => {
           data: {
             id: id,
             status: "cancel",
-            message: "Deposit dibatalkan (offline mode)"
+            message: "Deposit berhasil dibatalkan"
           }
         });
-      }
-    }
-
-    // CANCEL ATLANTIC
-    else {
-      try {
-        const formData = {
-          api_key: ATLAN_API_KEY,
-          id: deposit.id
-        };
-
-        const response = await cloudscraper.post(`${BASE_URL}/deposit/cancel`, {
-          body: qs.stringify(formData),
-          headers: cloudscraperHeaders,
-          timeout: 30000
-        });
-
-        const result = JSON.parse(response);
-        
-        if (result?.status && result?.data) {
-          await editHistoryDeposit(user._id, id, "cancel");
-          
-          return res.status(200).json({
-            success: true,
-            data: result.data
-          });
-        } else {
-          // Force cancel in DB
-          await editHistoryDeposit(user._id, id, "cancel");
-          
-          return res.status(200).json({
-            success: true,
-            data: {
-              id: id,
-              status: "cancel"
-            }
-          });
-        }
 
       } catch (error) {
-        console.error("Error cancelling Atlantic deposit:", error);
+        console.error("Error cancelling Rumah OTP:", error);
         
-        // Force cancel in DB
+        // Tetap cancel di DB
         await editHistoryDeposit(user._id, id, "cancel");
         
         return res.status(200).json({
@@ -704,29 +618,46 @@ router.post("/deposit/cancel", requireLogin, async (req, res) => {
       }
     }
 
+    // CANCEL ATLANTIC
+    else {
+      try {
+        const formData = { api_key: ATLAN_API_KEY, id: deposit.id };
+        await cloudscraper.post(`${BASE_URL}/deposit/cancel`, {
+          body: qs.stringify(formData),
+          headers: cloudscraperHeaders,
+          timeout: 30000
+        });
+
+        await editHistoryDeposit(user._id, id, "cancel");
+        
+        return res.status(200).json({
+          success: true,
+          data: {
+            id: id,
+            status: "cancel"
+          }
+        });
+
+      } catch (error) {
+        console.error("Error cancelling Atlantic:", error);
+        
+        await editHistoryDeposit(user._id, id, "cancel");
+        
+        return res.status(200).json({
+          success: true,
+          data: {
+            id: id,
+            status: "cancel"
+          }
+        });
+      }
+    }
+
   } catch (error) {
     console.error("❌ Error in /deposit/cancel:", error);
     return res.status(500).json({
       success: false,
       message: "Terjadi kesalahan internal"
-    });
-  }
-});
-
-// TEST ENDPOINT untuk cek koneksi Rumah OTP
-router.get("/test/rumahotp", requireLogin, async (req, res) => {
-  try {
-    const testDeposit = await createRumahOtpDeposit(10000);
-    res.json({
-      success: true,
-      message: "Koneksi ke Rumah OTP berhasil",
-      data: testDeposit
-    });
-  } catch (error) {
-    res.json({
-      success: false,
-      message: "Koneksi gagal",
-      error: error.message
     });
   }
 });
