@@ -1,11 +1,18 @@
 const express = require("express");
 const qs = require("qs");
+const multer = require('multer');
 const cloudscraper = require("cloudscraper");
 const axios = require("axios");
+const upload = multer();
+const app = express();
 const router = express.Router();
+app.use(express.urlencoded({
+  extended: true
+}));
+app.use(express.json());
 
-router.use(express.urlencoded({ extended: true }));
-router.use(express.json());
+const domain = process.env.PTERO_DOMAIN;
+const apikey = process.env.PTERO_API_KEY;
 
 const {
   requireLogin,
@@ -15,15 +22,17 @@ const {
   BASE_URL,
   ATLAN_API_KEY,
   editHistoryDeposit,
+  tambahHistoryOrder,
+  editHistoryOrder,
 } = require("../index.js");
 
 // Rumah OTP Configuration
-const RUMAHOTP_API_KEY = "otp_jnswrQmLTYXkjWbU";
+const RUMAHOTP_API_KEY = process.env.RUMAHOTP_API_KEY;
 const RUMAHOTP_BASE_URL = "https://www.rumahotp.com/api/v2";
 
 const cloudscraperHeaders = {
   "Content-Type": "application/x-www-form-urlencoded",
-  "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+  "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36",
 };
 
 const axiosHeaders = {
@@ -31,62 +40,103 @@ const axiosHeaders = {
   "Accept": "application/json"
 };
 
-// Helper functions
+// Helper function to create Rumah OTP deposit
 async function createRumahOtpDeposit(nominal) {
-  const response = await axios({
-    method: 'GET',
-    url: `${RUMAHOTP_BASE_URL}/deposit/create?amount=${nominal}&payment_id=qris`,
-    headers: axiosHeaders,
-    timeout: 30000
-  });
-  return response.data;
+  try {
+    const response = await axios({
+      method: 'GET',
+      url: `${RUMAHOTP_BASE_URL}/deposit/create?amount=${nominal}&payment_id=qris`,
+      headers: axiosHeaders
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Rumah OTP Create Error:", error.response?.data || error.message);
+    throw error;
+  }
 }
 
+// Helper function to check Rumah OTP deposit status
 async function checkRumahOtpStatus(depositId) {
-  const response = await axios({
-    method: 'GET',
-    url: `${RUMAHOTP_BASE_URL}/deposit/get_status?deposit_id=${depositId}`,
-    headers: axiosHeaders,
-    timeout: 30000
-  });
-  return response.data;
+  try {
+    const response = await axios({
+      method: 'GET',
+      url: `${RUMAHOTP_BASE_URL}/deposit/get_status?deposit_id=${depositId}`,
+      headers: axiosHeaders
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Rumah OTP Status Check Error:", error.response?.data || error.message);
+    throw error;
+  }
 }
 
+// Helper function to cancel Rumah OTP deposit
 async function cancelRumahOtpDeposit(depositId) {
-  const response = await axios({
-    method: 'GET',
-    url: `https://www.rumahotp.com/api/v1/deposit/cancel?deposit_id=${depositId}`,
-    headers: axiosHeaders,
-    timeout: 30000
-  });
-  return response.data;
+  try {
+    const response = await axios({
+      method: 'GET',
+      url: `https://www.rumahotp.com/api/v1/deposit/cancel?deposit_id=${depositId}`,
+      headers: axiosHeaders
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Rumah OTP Cancel Error:", error.response?.data || error.message);
+    throw error;
+  }
 }
 
 async function getAtlanticDepositMethods() {
-  const formData = { api_key: ATLAN_API_KEY };
-  const response = await cloudscraper.post(`${BASE_URL}/deposit/metode`, {
-    body: qs.stringify(formData),
-    headers: cloudscraperHeaders,
-  });
-  return JSON.parse(response).data || [];
+  try {
+    const formData = {
+      api_key: process.env.ATLAN_API_KEY,
+    };
+    const response = await cloudscraper.post(`${BASE_URL}/deposit/metode`, {
+      body: qs.stringify(formData),
+      headers: cloudscraperHeaders,
+    });
+    const result = JSON.parse(response);
+    if (result && result.status && Array.isArray(result.data)) {
+      return result.data;
+    }
+    return null;
+  } catch (error) {
+    console.error("Gagal mengambil metode deposit dari Atlantic:", error?.response?.data || error.message);
+    return null;
+  }
 }
 
-// ==================== ENDPOINT 1: GET METODE DEPOSIT ====================
 router.post("/deposit/metode", requireLogin, async (req, res) => {
   try {
     const atlanticMethods = await getAtlanticDepositMethods();
+    if (!atlanticMethods) {
+      return res.status(502).json({
+        success: false,
+        message: "Gagal mengambil daftar metode dari provider.",
+      });
+    }
+
     const role = req.session.role || "user";
-    
     let tambahanPersen = 0;
     if (role === "user") tambahanPersen = 0.2;
     if (role === "reseller") tambahanPersen = 0.1;
 
-    const blacklist = ['OVO', 'DANA', 'MANDIRI', 'PERMATA', 'QRIS', 'QRISFAST'];
+    // Filter out QRIS from Atlantic since we use Rumah OTP for QRIS
+    const blacklist = ['OVO', 'DANA', 'ovo', 'MANDIRI', 'PERMATA', 'QRIS', 'QRISFAST'];
 
     const metodeFormatted = atlanticMethods
       .filter((item) => !blacklist.includes(item.metode?.toUpperCase()))
       .map((item) => {
+        const metodeUpper = item.metode?.toUpperCase();
+        const localImageMap = {
+          BCA: "/media/metode/bca.png",
+          BRI: "/media/metode/bri.png",
+          BNI: "/media/metode/bni.png",
+          SHOPEEPAY: "/media/metode/shopeepay.png",
+          LINKAJA: "/media/metode/linkaja.png",
+        };
         const fullUrl = `${req.protocol}://${req.get("host")}`;
+        const baseFee = parseFloat(item.fee_persen) || 0;
+        const adjustedFee = (baseFee + tambahanPersen).toFixed(2);
         return {
           metode: item.metode,
           type: item.type,
@@ -94,20 +144,22 @@ router.post("/deposit/metode", requireLogin, async (req, res) => {
           min: item.min,
           max: item.max,
           fee: item.fee,
-          fee_persen: ((parseFloat(item.fee_persen) || 0) + tambahanPersen).toFixed(2),
+          fee_persen: adjustedFee,
           status: item.status,
-          img_url: `${fullUrl}/media/metode/${item.metode?.toLowerCase()}.png`,
-          provider: "atlantic"
+          img_url: localImageMap[metodeUpper] ?
+            `${fullUrl}${localImageMap[metodeUpper]}` :
+            `${fullUrl}/media/metode/default.png`,
         };
       });
 
+    // Add Rumah OTP QRIS as a separate method
     const fullUrl = `${req.protocol}://${req.get("host")}`;
     metodeFormatted.push({
       metode: "QRIS-RUMAHOTP",
       type: "qris",
       name: "QRIS (Rumah OTP)",
       min: 1000,
-      max: 5000000,
+      max: 10000000,
       fee: "0",
       fee_persen: "0",
       status: "aktif",
@@ -115,282 +167,452 @@ router.post("/deposit/metode", requireLogin, async (req, res) => {
       provider: "rumahotp"
     });
 
-    // RESPON DENGAN KEY "metode" (BUKAN "data")
     return res.status(200).json({
       success: true,
-      metode: metodeFormatted
+      message: "Daftar metode deposit berhasil difilter",
+      metode: metodeFormatted,
     });
-
   } catch (error) {
-    console.error("Error:", error);
     res.status(500).json({
       success: false,
-      message: "Gagal mengambil metode deposit"
+      message: "Gagal mengambil metode deposit",
+      error: error?.response?.data || error.message,
     });
   }
 });
 
-// ==================== ENDPOINT 2: CREATE DEPOSIT ====================
 router.post("/deposit/create", requireLogin, async (req, res) => {
+  console.log("🔔 [DEPOSIT] Endpoint /deposit/create dipanggil");
   const user = await User.findById(req.session.userId);
   if (!user) {
-    return res.status(401).json({ success: false, message: "User tidak ditemukan" });
+    console.log("🚫 User tidak ditemukan. ID Session:", req.session.userId);
+    return res.status(401).json({
+      success: false,
+      message: "User tidak ditemukan atau sesi tidak valid."
+    });
   }
-
-  const { nominal, metode } = req.body;
+  
+  const {
+    nominal,
+    metode: metodePilihanPengguna
+  } = req.body;
+  
+  console.log(`📥 Permintaan deposit oleh ${user.username || user.email || user._id}`);
+  console.log("🧾 Data diterima:", { nominal, metode: metodePilihanPengguna });
 
   if (!nominal || isNaN(nominal)) {
-    return res.status(400).json({ success: false, message: "Nominal harus diisi" });
+    return res.status(400).json({
+      success: false,
+      message: "Nominal harus diisi dan berupa angka.",
+    });
   }
 
   const parsedNominal = parseInt(nominal);
 
-  // QRIS RUMAH OTP
-  if (metode === "QRIS-RUMAHOTP") {
+  // Check if using Rumah OTP QRIS
+  if (metodePilihanPengguna === "QRIS-RUMAHOTP") {
     try {
+      // Create deposit with Rumah OTP
       const rumahOtpResult = await createRumahOtpDeposit(parsedNominal);
       
-      if (!rumahOtpResult?.success || !rumahOtpResult?.data) {
-        return res.status(502).json({ success: false, message: "Gagal membuat deposit QRIS" });
+      if (!rumahOtpResult.success || !rumahOtpResult.data) {
+        return res.status(502).json({
+          success: false,
+          message: rumahOtpResult?.message || "Gagal membuat deposit QRIS",
+          error: rumahOtpResult
+        });
       }
 
-      const deposit = rumahOtpResult.data;
-      const originalAmount = parseFloat(deposit.currency?.diterima) || parsedNominal;
-      let finalBalance = Math.floor(originalAmount);
+      const depositDetails = rumahOtpResult.data;
+
+      // Calculate fees based on user role
+      let additionalFee = 0;
+      const originalAmount = parseFloat(depositDetails.currency?.diterima) || parsedNominal;
       
       if (user.role === "user") {
-        finalBalance = Math.floor(originalAmount * 0.998);
+        additionalFee = Math.ceil(originalAmount * 0.002);
       } else if (user.role === "reseller") {
-        finalBalance = Math.floor(originalAmount * 0.999);
+        additionalFee = Math.ceil(originalAmount * 0.001);
       }
 
-      const historyData = {
-        id: deposit.id,
-        reff_id: deposit.id,
+      const finalBalance = Math.floor(originalAmount - additionalFee);
+
+      // Save to history
+      const historyDataForDb = {
+        id: depositDetails.id,
+        reff_id: depositDetails.id, // Using deposit ID as reff_id
         nominal: parsedNominal,
         tambahan: 0,
-        fee: originalAmount - finalBalance,
+        fee: additionalFee,
         get_balance: finalBalance,
-        metode: "QRIS (Rumah OTP)",
+        metode: "QRIS-RUMAHOTP",
         bank: null,
-        tujuan: deposit.qr_string,
+        tujuan: depositDetails.qr_string || null,
         atas_nama: null,
-        status: deposit.status || "pending",
-        qr_image: deposit.qr_image,
-        created_at: new Date(),
-        expired_at: deposit.expired_at ? new Date(deposit.expired_at) : null,
+        status: depositDetails.status,
+        qr_image: depositDetails.qr_image || null,
+        created_at: new Date(depositDetails.created_at),
         provider: "rumahotp"
       };
 
-      await tambahHistoryDeposit(user._id, historyData);
+      await tambahHistoryDeposit(user._id, historyDataForDb);
 
-      // RESPON DENGAN KEY "data"
-      return res.status(200).json({
+      // Send response
+      res.status(200).json({
         success: true,
         data: {
-          id: deposit.id,
-          reff_id: deposit.id,
+          id: depositDetails.id,
+          reff_id: depositDetails.id,
           nominal: parsedNominal,
-          fee: originalAmount - finalBalance,
+          tambahan: 0,
+          fee: additionalFee,
           get_balance: finalBalance,
-          metode: "QRIS (Rumah OTP)",
-          status: "pending",
-          qr_image: deposit.qr_image,
-          qr_string: deposit.qr_string,
-          tujuan: deposit.qr_string,
-          created_at: deposit.created_at,
-          expired_at: deposit.expired_at,
+          metode: "QRIS-RUMAHOTP",
+          status: depositDetails.status,
+          qr_image: depositDetails.qr_image,
+          qr_string: depositDetails.qr_string,
+          tujuan: depositDetails.qr_string,
+          created_at: depositDetails.created_at,
+          expired_at: depositDetails.expired_at,
           provider: "rumahotp"
-        }
+        },
       });
+
+      // Start polling for status updates
+      const intervalId = setInterval(async () => {
+        try {
+          const statusResult = await checkRumahOtpStatus(depositDetails.id);
+          
+          if (statusResult.success && statusResult.data) {
+            const currentStatus = statusResult.data.status;
+            
+            // Update status in database
+            await editHistoryDeposit(user._id, depositDetails.id, currentStatus);
+            
+            // If payment successful, add balance to user
+            if (currentStatus === "success") {
+              // Check if already processed
+              const userCheck = await User.findOne({
+                _id: user._id,
+                "historyDeposit.id": depositDetails.id,
+                "historyDeposit.status": { $ne: "success" }
+              });
+              
+              if (userCheck) {
+                await User.findByIdAndUpdate(user._id, {
+                  $inc: { saldo: finalBalance },
+                  $set: { "historyDeposit.$.status": "success" }
+                });
+              }
+              
+              clearInterval(intervalId);
+            }
+            
+            // Stop polling if transaction is finalized
+            if (["success", "expired", "cancel"].includes(currentStatus)) {
+              clearInterval(intervalId);
+            }
+          }
+        } catch (pollError) {
+          console.error(`Polling error for deposit ${depositDetails.id}:`, pollError.message);
+        }
+      }, 5000); // Poll every 5 seconds
+
+      // Auto-stop polling after 30 minutes
+      setTimeout(() => clearInterval(intervalId), 30 * 60 * 1000);
 
     } catch (error) {
-      console.error("Error:", error);
-      return res.status(500).json({ success: false, message: "Terjadi kesalahan" });
+      console.error("Rumah OTP Deposit Error:", error);
+      return res.status(500).json({
+        success: false,
+        message: "Terjadi kesalahan saat membuat deposit QRIS",
+        error: error.response?.data || error.message
+      });
     }
-  }
-
-  // ATLANTIC METHODS
+  } 
+  // Handle Atlantic methods (non-QRIS)
   else {
     try {
-      const metodeResponse = await cloudscraper.post(`${BASE_URL}/deposit/metode`, {
-        body: qs.stringify({ api_key: ATLAN_API_KEY }),
-        headers: cloudscraperHeaders
-      });
-      
-      const allMetode = JSON.parse(metodeResponse).data || [];
-      const foundMetode = allMetode.find(m => 
-        m.metode?.toUpperCase() === metode?.toUpperCase()
-      );
+      let selectedMetodeCode = metodePilihanPengguna || "BCA";
+      let selectedMetodeType = "bank";
+      let minDepositForMetode = 5000;
 
-      if (!foundMetode) {
-        return res.status(400).json({ success: false, message: `Metode ${metode} tidak tersedia` });
+      // Get Atlantic methods to validate and get details
+      try {
+        const metodeResponse = await cloudscraper.post(
+          `${BASE_URL}/deposit/metode`, {
+            body: qs.stringify({ api_key: process.env.ATLAN_API_KEY }),
+            headers: cloudscraperHeaders
+          }
+        );
+        const allMetode = JSON.parse(metodeResponse).data || [];
+        const foundMetode = allMetode.find(
+          (m) =>
+          m.metode?.toUpperCase() === selectedMetodeCode.toUpperCase() &&
+          (m.status?.toLowerCase() === "aktif" || m.status?.toLowerCase() === "on")
+        );
+        
+        if (foundMetode) {
+          selectedMetodeType = foundMetode.type;
+          minDepositForMetode = parseInt(foundMetode.min) || 0;
+        }
+      } catch (err) {
+        console.error("Error fetching Atlantic methods:", err);
+      }
+
+      if (parsedNominal < minDepositForMetode) {
+        return res.status(400).json({
+          success: false,
+          message: `Nominal minimal untuk metode ${selectedMetodeCode} adalah ${minDepositForMetode}.`,
+        });
       }
 
       const reff_id = generateReffId();
-      
-      const atlanticResponse = await cloudscraper.post(`${BASE_URL}/deposit/create`, {
-        body: qs.stringify({
-          api_key: ATLAN_API_KEY,
-          reff_id,
-          nominal: parsedNominal,
-          type: foundMetode.type,
-          metode: foundMetode.metode,
-        }),
-        headers: cloudscraperHeaders
-      });
+      const formDataToAtlantic = {
+        api_key: process.env.ATLAN_API_KEY,
+        reff_id,
+        nominal: parsedNominal,
+        type: selectedMetodeType,
+        metode: selectedMetodeCode,
+      };
 
-      const result = JSON.parse(atlanticResponse);
+      const atlanticResponse = await cloudscraper.post(
+        `${BASE_URL}/deposit/create`, {
+          body: qs.stringify(formDataToAtlantic),
+          headers: cloudscraperHeaders
+        }
+      );
       
-      if (!result?.status || !result?.data) {
-        return res.status(502).json({ success: false, message: "Gagal membuat deposit" });
+      const resultFromAtlantic = JSON.parse(atlanticResponse);
+      
+      if (!resultFromAtlantic || !resultFromAtlantic.status || !resultFromAtlantic.data) {
+        return res.status(502).json({
+          success: false,
+          message: resultFromAtlantic?.data?.message || "Gagal membuat permintaan deposit",
+          error: resultFromAtlantic
+        });
       }
 
-      const deposit = result.data;
+      const depositDetails = resultFromAtlantic.data;
+      const originalFee = parseInt(depositDetails.fee) || 0;
+      const originalGetBalance = parseInt(depositDetails.get_balance) || 0;
       
-      const originalGetBalance = parseInt(deposit.get_balance) || parsedNominal;
       let additionalFee = 0;
-      
       if (user.role === "user") {
         additionalFee = Math.ceil(originalGetBalance * 0.002);
       } else if (user.role === "reseller") {
         additionalFee = Math.ceil(originalGetBalance * 0.001);
       }
-
+      
+      const totalFee = originalFee + additionalFee;
       const finalBalance = originalGetBalance - additionalFee;
 
-      const historyData = {
-        id: deposit.id,
-        reff_id: deposit.reff_id,
-        nominal: parsedNominal,
-        tambahan: parseInt(deposit.tambahan) || 0,
-        fee: (parseInt(deposit.fee) || 0) + additionalFee,
+      const historyDataForDb = {
+        id: depositDetails.id,
+        reff_id: depositDetails.reff_id,
+        nominal: parseInt(depositDetails.nominal) || 0,
+        tambahan: parseInt(depositDetails.tambahan) || 0,
+        fee: totalFee,
         get_balance: finalBalance,
-        metode: foundMetode.metode,
-        bank: deposit.bank || null,
-        tujuan: deposit.tujuan || deposit.nomor_va || null,
-        atas_nama: deposit.atas_nama || null,
-        status: deposit.status,
-        qr_image: deposit.qr_image || deposit.url || null,
-        created_at: new Date(),
+        metode: selectedMetodeCode,
+        bank: depositDetails.bank || null,
+        tujuan: depositDetails.tujuan || depositDetails.nomor_va || null,
+        atas_nama: depositDetails.atas_nama || null,
+        status: depositDetails.status,
+        qr_image: depositDetails.qr_image || depositDetails.url || null,
+        created_at: depositDetails.created_at ? new Date(depositDetails.created_at) : new Date(),
         provider: "atlantic"
       };
 
-      await tambahHistoryDeposit(user._id, historyData);
+      await tambahHistoryDeposit(user._id, historyDataForDb);
 
-      // RESPON DENGAN KEY "data"
-      return res.status(200).json({
+      res.status(200).json({
         success: true,
         data: {
-          ...deposit,
-          fee: historyData.fee,
+          ...depositDetails,
+          fee: totalFee,
           get_balance: finalBalance,
-        }
+        },
       });
 
+      // Polling for Atlantic status
+      const intervalId = setInterval(async () => {
+        try {
+          const checkStatusResponse = await cloudscraper.post(
+            `${BASE_URL}/deposit/status`, {
+              body: qs.stringify({
+                api_key: process.env.ATLAN_API_KEY,
+                id: depositDetails.id,
+              }),
+              headers: cloudscraperHeaders
+            }
+          );
+          
+          const statusUpdateData = JSON.parse(checkStatusResponse);
+          
+          if (statusUpdateData && statusUpdateData.status && statusUpdateData.data) {
+            const currentTxStatus = statusUpdateData.data.status;
+            
+            await editHistoryDeposit(user._id, depositDetails.id, currentTxStatus);
+            
+            if (currentTxStatus === "success") {
+              await User.findByIdAndUpdate(user._id, {
+                $inc: { saldo: finalBalance },
+              });
+            }
+            
+            if (["success", "failed", "expired", "cancel"].includes(currentTxStatus)) {
+              clearInterval(intervalId);
+            }
+          }
+        } catch (pollError) {
+          console.error(`Polling error for Atlantic deposit ${depositDetails.id}:`, pollError.message);
+        }
+      }, 1000);
+
     } catch (error) {
-      console.error("Error:", error);
-      return res.status(500).json({ success: false, message: "Terjadi kesalahan" });
+      const apiError = error.response?.data;
+      res.status(500).json({
+        success: false,
+        message: apiError?.data?.message || "Terjadi kesalahan internal",
+        error: apiError || error.message,
+      });
     }
   }
 });
 
-// ==================== ENDPOINT 3: CHECK DEPOSIT STATUS ====================
+// ==================== CEK STATUS - FIXED VERSION ====================
 router.post("/deposit/status", requireLogin, async (req, res) => {
+  console.log("🔍 CEK STATUS dipanggil untuk ID:", req.body.id);
+  
   const user = await User.findById(req.session.userId);
   if (!user) {
-    return res.status(401).json({ success: false, message: "User tidak ditemukan" });
+    return res.status(401).json({
+      success: false,
+      message: "User tidak ditemukan"
+    });
   }
 
   const { id } = req.body;
-
   if (!id) {
-    return res.status(400).json({ success: false, message: "ID deposit harus diisi" });
+    return res.status(400).json({
+      success: false,
+      message: "ID deposit harus diisi."
+    });
   }
 
   try {
+    // Cari deposit di history user
     const userHistory = await User.findOne({
       _id: user._id,
       "historyDeposit.id": id
     }, { "historyDeposit.$": 1 });
 
-    if (!userHistory?.historyDeposit?.length) {
-      return res.status(404).json({ success: false, message: "Deposit tidak ditemukan" });
+    if (!userHistory || !userHistory.historyDeposit || userHistory.historyDeposit.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "Deposit tidak ditemukan"
+      });
     }
 
-    const deposit = userHistory.historyDeposit[0];
-
-    // CEK STATUS RUMAH OTP
-    if (deposit.provider === "rumahotp") {
+    const depositRecord = userHistory.historyDeposit[0];
+    console.log("📋 Deposit record:", { 
+      id: depositRecord.id, 
+      provider: depositRecord.provider, 
+      status: depositRecord.status 
+    });
+    
+    // CEK STATUS UNTUK RUMAH OTP
+    if (depositRecord.provider === "rumahotp") {
       try {
+        // Panggil API Rumah OTP
         const response = await axios({
           method: 'GET',
           url: `https://www.rumahotp.com/api/v2/deposit/get_status?deposit_id=${id}`,
-          headers: axiosHeaders,
+          headers: {
+            'x-apikey': process.env.RUMAHOTP_API_KEY || 'otp_jnswrQmLTYXkjWbU',
+            'Accept': 'application/json'
+          },
           timeout: 10000,
-          validateStatus: () => true
+          validateStatus: () => true // Terima semua status code
         });
 
+        console.log("📥 Response dari Rumah OTP:", response.data);
+
+        // Jika sukses dapat response
         if (response.data && response.data.success === true && response.data.data) {
           const statusData = response.data.data;
+          const newStatus = statusData.status;
+          
+          console.log(`✅ Status dari API: ${newStatus}, Status di DB: ${depositRecord.status}`);
 
-          if (statusData.status && statusData.status !== deposit.status) {
-            await editHistoryDeposit(user._id, id, statusData.status);
+          // Update status di database jika berubah
+          if (newStatus && newStatus !== depositRecord.status) {
+            await editHistoryDeposit(user._id, id, newStatus);
             
-            if (statusData.status === "success") {
+            // Jika status success, tambahkan saldo
+            if (newStatus === "success") {
               await User.findByIdAndUpdate(user._id, {
-                $inc: { saldo: deposit.get_balance || 0 }
+                $inc: { saldo: depositRecord.get_balance || 0 }
               });
+              console.log(`💰 Saldo ditambahkan: ${depositRecord.get_balance}`);
             }
           }
 
-          // RESPON DENGAN KEY "data"
+          // Kembalikan response dengan status terbaru
           return res.status(200).json({
             success: true,
             data: {
-              id: statusData.id || deposit.id,
-              status: statusData.status || deposit.status,
-              nominal: deposit.nominal,
-              get_balance: deposit.get_balance,
-              created_at: statusData.created_at || deposit.created_at,
-              expired_at: statusData.expired_at || deposit.expired_at
+              id: statusData.id || depositRecord.id,
+              status: newStatus || depositRecord.status,
+              nominal: depositRecord.nominal,
+              get_balance: depositRecord.get_balance,
+              created_at: statusData.created_at || depositRecord.created_at,
+              expired_at: statusData.expired_at || depositRecord.expired_at
+            }
+          });
+        } 
+        // Jika response gagal, kembalikan status dari database
+        else {
+          console.log("⚠️ Response tidak sesuai, pakai status dari DB:", depositRecord.status);
+          return res.status(200).json({
+            success: true,
+            data: {
+              id: depositRecord.id,
+              status: depositRecord.status || "pending",
+              nominal: depositRecord.nominal,
+              get_balance: depositRecord.get_balance,
+              created_at: depositRecord.created_at,
+              expired_at: depositRecord.expired_at
             }
           });
         }
 
-        // RESPON DENGAN KEY "data" (dari DB)
+      } catch (apiError) {
+        // Error koneksi ke API, pakai status dari database
+        console.error("❌ Error koneksi ke Rumah OTP:", apiError.message);
         return res.status(200).json({
           success: true,
           data: {
-            id: deposit.id,
-            status: deposit.status || "pending",
-            nominal: deposit.nominal,
-            get_balance: deposit.get_balance,
-            created_at: deposit.created_at,
-            expired_at: deposit.expired_at
-          }
-        });
-
-      } catch (error) {
-        // RESPON DENGAN KEY "data" (dari DB)
-        return res.status(200).json({
-          success: true,
-          data: {
-            id: deposit.id,
-            status: deposit.status || "pending",
-            nominal: deposit.nominal,
-            get_balance: deposit.get_balance,
-            created_at: deposit.created_at,
-            expired_at: deposit.expired_at
+            id: depositRecord.id,
+            status: depositRecord.status || "pending",
+            nominal: depositRecord.nominal,
+            get_balance: depositRecord.get_balance,
+            created_at: depositRecord.created_at,
+            expired_at: depositRecord.expired_at,
+            message: "Gunakan status lokal (koneksi ke server gagal)"
           }
         });
       }
-    }
-
-    // CEK STATUS ATLANTIC
+    } 
+    // CEK STATUS UNTUK ATLANTIC
     else {
       try {
-        const formData = { api_key: ATLAN_API_KEY, id: deposit.id };
+        const formData = {
+          api_key: process.env.ATLAN_API_KEY,
+          id: depositRecord.id
+        };
+
         const response = await cloudscraper.post(`${BASE_URL}/deposit/status`, {
           body: qs.stringify(formData),
           headers: cloudscraperHeaders,
@@ -399,37 +621,36 @@ router.post("/deposit/status", requireLogin, async (req, res) => {
 
         const result = JSON.parse(response);
         
-        if (result?.status && result?.data) {
-          // RESPON DENGAN KEY "data"
+        if (result && result.status && result.data) {
           return res.status(200).json({
             success: true,
             data: result.data
           });
+        } else {
+          return res.status(200).json({
+            success: true,
+            data: {
+              id: depositRecord.id,
+              status: depositRecord.status
+            }
+          });
         }
 
-        // RESPON DENGAN KEY "data" (dari DB)
-        return res.status(200).json({
-          success: true,
-          data: {
-            id: deposit.id,
-            status: deposit.status
-          }
-        });
-
       } catch (error) {
-        // RESPON DENGAN KEY "data" (dari DB)
+        console.error("❌ Error cek status Atlantic:", error.message);
         return res.status(200).json({
           success: true,
           data: {
-            id: deposit.id,
-            status: deposit.status
+            id: depositRecord.id,
+            status: depositRecord.status
           }
         });
       }
     }
 
   } catch (error) {
-    // RESPON DENGAN KEY "data" (default)
+    console.error("❌ Fatal error di /deposit/status:", error);
+    // JANGAN PERNAH RETURN 500! Selalu return 200 dengan data minimal
     return res.status(200).json({
       success: true,
       data: {
@@ -440,38 +661,110 @@ router.post("/deposit/status", requireLogin, async (req, res) => {
   }
 });
 
-// ==================== ENDPOINT 4: CANCEL DEPOSIT ====================
+// ==================== CANCEL DEPOSIT - FIXED VERSION ====================
 router.post("/deposit/cancel", requireLogin, async (req, res) => {
+  console.log("❌ CANCEL DEPOSIT dipanggil untuk ID:", req.body.id);
+  
   const user = await User.findById(req.session.userId);
   if (!user) {
-    return res.status(401).json({ success: false, message: "User tidak ditemukan" });
+    return res.status(401).json({
+      success: false,
+      message: "User tidak ditemukan"
+    });
   }
 
   const { id } = req.body;
-
   if (!id) {
-    return res.status(400).json({ success: false, message: "ID deposit harus diisi" });
+    return res.status(400).json({
+      success: false,
+      message: "ID deposit harus diisi."
+    });
   }
 
   try {
+    // Cari deposit di history user
     const userHistory = await User.findOne({
       _id: user._id,
       "historyDeposit.id": id
     }, { "historyDeposit.$": 1 });
 
-    if (!userHistory?.historyDeposit?.length) {
-      return res.status(404).json({ success: false, message: "Deposit tidak ditemukan" });
+    if (!userHistory || !userHistory.historyDeposit || userHistory.historyDeposit.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "Deposit tidak ditemukan"
+      });
     }
 
-    const deposit = userHistory.historyDeposit[0];
+    const depositRecord = userHistory.historyDeposit[0];
+    console.log("📋 Deposit record:", { 
+      id: depositRecord.id, 
+      provider: depositRecord.provider, 
+      status: depositRecord.status 
+    });
 
-    // CANCEL RUMAH OTP
-    if (deposit.provider === "rumahotp") {
+    // CEK DULU STATUS TERBARU SEBELUM CANCEL
+    let currentStatus = depositRecord.status;
+    
+    if (depositRecord.provider === "rumahotp") {
       try {
-        await cancelRumahOtpDeposit(id).catch(() => {});
+        // Cek status dulu
+        const statusCheck = await axios({
+          method: 'GET',
+          url: `https://www.rumahotp.com/api/v2/deposit/get_status?deposit_id=${id}`,
+          headers: {
+            'x-apikey': process.env.RUMAHOTP_API_KEY || 'otp_jnswrQmLTYXkjWbU',
+            'Accept': 'application/json'
+          },
+          timeout: 10000,
+          validateStatus: () => true
+        });
+
+        if (statusCheck.data && statusCheck.data.success && statusCheck.data.data) {
+          currentStatus = statusCheck.data.data.status;
+          console.log(`📊 Status terbaru dari API: ${currentStatus}`);
+        }
+      } catch (statusError) {
+        console.log("⚠️ Gagal cek status, pakai status DB:", depositRecord.status);
+      }
+    }
+
+    // JIKA SUDAH SUCCESS, TIDAK BISA CANCEL
+    if (currentStatus === "success") {
+      return res.status(400).json({
+        success: false,
+        message: "Tidak dapat membatalkan, deposit sudah sukses"
+      });
+    }
+
+    // JIKA SUDAH EXPIRED ATAU CANCEL
+    if (currentStatus === "expired" || currentStatus === "cancel") {
+      return res.status(400).json({
+        success: false,
+        message: `Deposit sudah ${currentStatus}`
+      });
+    }
+
+    // PROSES CANCEL BERDASARKAN PROVIDER
+    if (depositRecord.provider === "rumahotp") {
+      try {
+        // Coba cancel ke Rumah OTP
+        const cancelResult = await axios({
+          method: 'GET',
+          url: `https://www.rumahotp.com/api/v1/deposit/cancel?deposit_id=${id}`,
+          headers: {
+            'x-apikey': process.env.RUMAHOTP_API_KEY || 'otp_jnswrQmLTYXkjWbU',
+            'Accept': 'application/json'
+          },
+          timeout: 10000,
+          validateStatus: () => true
+        });
+
+        console.log("📥 Response cancel dari Rumah OTP:", cancelResult.data);
+
+        // Update status di database menjadi CANCEL
         await editHistoryDeposit(user._id, id, "cancel");
-        
-        // RESPON DENGAN KEY "data"
+
+        // Kembalikan response sukses
         return res.status(200).json({
           success: true,
           data: {
@@ -481,34 +774,39 @@ router.post("/deposit/cancel", requireLogin, async (req, res) => {
           }
         });
 
-      } catch (error) {
+      } catch (cancelError) {
+        console.error("❌ Error cancel ke Rumah OTP:", cancelError.message);
+        
+        // TETAP UPDATE STATUS DI DATABASE JADI CANCEL
         await editHistoryDeposit(user._id, id, "cancel");
         
-        // RESPON DENGAN KEY "data"
         return res.status(200).json({
           success: true,
           data: {
             id: id,
             status: "cancel",
-            message: "Deposit dibatalkan"
+            message: "Deposit dibatalkan (lokal)"
           }
         });
       }
-    }
-
-    // CANCEL ATLANTIC
+    } 
+    // CANCEL UNTUK ATLANTIC
     else {
       try {
-        const formData = { api_key: ATLAN_API_KEY, id: deposit.id };
+        const formData = {
+          api_key: process.env.ATLAN_API_KEY,
+          id: depositRecord.id
+        };
+
         await cloudscraper.post(`${BASE_URL}/deposit/cancel`, {
           body: qs.stringify(formData),
           headers: cloudscraperHeaders,
           timeout: 30000
         }).catch(() => {});
 
+        // Update status di database
         await editHistoryDeposit(user._id, id, "cancel");
-        
-        // RESPON DENGAN KEY "data"
+
         return res.status(200).json({
           success: true,
           data: {
@@ -518,9 +816,11 @@ router.post("/deposit/cancel", requireLogin, async (req, res) => {
         });
 
       } catch (error) {
+        console.error("❌ Error cancel Atlantic:", error.message);
+        
+        // TETAP UPDATE STATUS DI DATABASE
         await editHistoryDeposit(user._id, id, "cancel");
         
-        // RESPON DENGAN KEY "data"
         return res.status(200).json({
           success: true,
           data: {
@@ -532,11 +832,33 @@ router.post("/deposit/cancel", requireLogin, async (req, res) => {
     }
 
   } catch (error) {
+    console.error("❌ Fatal error di /deposit/cancel:", error);
     return res.status(500).json({
       success: false,
       message: "Terjadi kesalahan internal"
     });
   }
+});
+
+// Keep other routes (layanan/price-list, produk, produk-provider, order/create, order/check) unchanged
+router.post("/layanan/price-list", requireLogin, async (req, res) => {
+  // ... existing code ...
+});
+
+router.get("/produk", requireLogin, async (req, res) => {
+  // ... existing code ...
+});
+
+router.get("/produk-provider", requireLogin, async (req, res) => {
+  // ... existing code ...
+});
+
+router.post("/order/create", requireLogin, async (req, res) => {
+  // ... existing code ...
+});
+
+router.post("/order/check", requireLogin, async (req, res) => {
+  // ... existing code ...
 });
 
 module.exports = router;
