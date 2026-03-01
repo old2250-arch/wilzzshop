@@ -549,9 +549,9 @@ router.get("/layanan/price-list", validateApiKey, async (req, res) => {
       let modifiedPrice = originalPrice;
 
       if (user.role === "user") {
-        modifiedPrice = originalPrice + 0;
+        modifiedPrice = originalPrice + 500;
       } else if (user.role === "reseller") {
-        modifiedPrice = originalPrice + 0;
+        modifiedPrice = originalPrice + 300;
       }
 
       return {
